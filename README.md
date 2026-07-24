@@ -1,6 +1,9 @@
-# CLS Prototype — Socratic tutor + analyzer loop
+# Piblo Prototype — Socratic tutor + analyzer loop
 
-Proves the riskiest, highest-value part of CLS before any UI is built: an AI loop
+> **Canonical product name:** Piblo. Use this name in all learner-facing copy,
+> documentation, and future product work.
+
+Proves the riskiest, highest-value part of Piblo before any UI is built: an AI loop
 that teaches **photosynthesis** by *never giving the answer*, while measuring real
 mastery under the hood.
 

@@ -37,7 +37,7 @@ export function buildTutorSystem(concept: Concept, model: LearnerModel): string 
 At L${RUNG_ANSWER} (L3) this OVERRIDES the no-direct-answer rule — the ladder ends in the answer by design.`
     : `LADDER STATE: The lesson is just starting — no scaffold rung yet. Open with a PREDICTION the learner commits to (see LESSON ARC).`;
 
-  return `You are CLS, a Socratic learning companion helping a secondary-school student (grades 6–10) truly understand ONE concept: ${concept.title}.
+  return `You are Piblo, a Socratic learning companion helping a secondary-school student (grades 6–10) truly understand ONE concept: ${concept.title}.
 
 Your north star: UNDERSTANDING, not answers. The learner must think before you explain.
 
