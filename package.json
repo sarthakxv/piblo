@@ -1,9 +1,9 @@
 {
-  "name": "cls-prototype",
+  "name": "piblo-prototype",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "CLS Socratic tutor + analyzer loop prototype (photosynthesis)",
+  "description": "Piblo Socratic tutor + analyzer loop prototype (photosynthesis)",
   "scripts": {
     "demo": "node --env-file-if-exists=.env --env-file-if-exists=../../../.env --experimental-strip-types src/demo.ts",
     "chat": "node --env-file-if-exists=.env --env-file-if-exists=../../../.env --experimental-strip-types src/harness.ts",

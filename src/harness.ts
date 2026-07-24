@@ -1,4 +1,4 @@
-// Interactive CLI: talk to the CLS tutor yourself.
+// Interactive CLI: talk to the Piblo tutor yourself.
 //   npm run chat
 // Commands:  /state  → dump learner model    /quit → exit
 
@@ -34,7 +34,7 @@ async function main() {
   const history: ChatMessage[] = [];
   const rl = createInterface({ input: stdin, output: stdout });
 
-  console.log(`\n=== CLS — let's understand ${concept.title} ===`);
+  console.log(`\n=== Piblo — let's understand ${concept.title} ===`);
   console.log(`(provider: ${modelLabel()} · type /state or /quit)\n`);
 
   const seed = "I'm ready to learn about photosynthesis.";

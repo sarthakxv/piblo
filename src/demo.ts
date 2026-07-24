@@ -1,4 +1,4 @@
-// Scripted, non-interactive demo of the CLS loop.
+// Scripted, non-interactive demo of the Piblo loop.
 // A simulated student starts with the classic "plants eat soil" misconception
 // and is walked toward understanding. Watch the learner-model panel move and
 // the misconception clear — that's the whole thesis of the product working.
@@ -27,7 +27,7 @@ async function main() {
   let model = emptyLearnerModel();
   const history: ChatMessage[] = [];
 
-  console.log(`\n=== CLS prototype — concept: ${concept.title} ===`);
+  console.log(`\n=== Piblo prototype — concept: ${concept.title} ===`);
   console.log(`provider: ${modelLabel()}\n`);
 
   // Opening diagnostic probe (no student input yet).
