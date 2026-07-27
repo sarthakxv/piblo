@@ -1,9 +1,15 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import {
+    useRef,
+    useState,
+    type FormEvent,
+    type ReactNode,
+    type RefObject,
+} from "react";
 import { cn } from "../lib/cn";
 
-type View = "home" | "lesson" | "complete";
+type View = "onboarding" | "home" | "lesson" | "complete";
 type TurnStatus = "idle" | "assessing" | "preparing" | "error";
 type Confidence = "Guessing" | "Somewhat sure" | "Sure";
 type RelationshipAnswer = "part" | "not-part";
@@ -28,11 +34,16 @@ interface LessonAnswers {
     reflectionEvidence: string;
 }
 
-interface SavedLesson {
-    phaseIndex: number;
-    grade: string;
-    goal: string;
-    answers: LessonAnswers;
+interface LearnerProfile {
+    version: 1;
+    name: string;
+    dateOfBirth: string;
+}
+
+interface DateOfBirthParts {
+    day: string;
+    month: string;
+    year: string;
 }
 
 interface PhaseDefinition {
@@ -42,7 +53,49 @@ interface PhaseDefinition {
     eyebrow: string;
 }
 
-const STORAGE_KEY = "piblo-lofi-photosynthesis";
+const PROFILE_STORAGE_KEY = "piblo-demo-profile-v1";
+
+const DATE_OF_BIRTH_FIELDS: Array<{
+    part: keyof DateOfBirthParts;
+    id: string;
+    name: string;
+    label: string;
+    placeholder: string;
+    autoComplete: string;
+    maxLength: number;
+    width: string;
+}> = [
+    {
+        part: "day",
+        id: "learner-birth-day",
+        name: "birthDay",
+        label: "Birth day",
+        placeholder: "DD",
+        autoComplete: "bday-day",
+        maxLength: 2,
+        width: "w-10",
+    },
+    {
+        part: "month",
+        id: "learner-birth-month",
+        name: "birthMonth",
+        label: "Birth month",
+        placeholder: "MM",
+        autoComplete: "bday-month",
+        maxLength: 2,
+        width: "w-10",
+    },
+    {
+        part: "year",
+        id: "learner-birth-year",
+        name: "birthYear",
+        label: "Birth year",
+        placeholder: "YYYY",
+        autoComplete: "bday-year",
+        maxLength: 4,
+        width: "w-20",
+    },
+];
 
 const PHASES: PhaseDefinition[] = [
     {
@@ -101,6 +154,76 @@ const EMPTY_ANSWERS: LessonAnswers = {
     applicationReason: "",
     reflection: "",
     reflectionEvidence: "",
+};
+
+const parseDateOfBirth = (
+    dayText: string,
+    monthText: string,
+    yearText: string,
+) => {
+    if (
+        !/^\d{2}$/.test(dayText) ||
+        !/^\d{2}$/.test(monthText) ||
+        !/^\d{4}$/.test(yearText)
+    ) {
+        return null;
+    }
+
+    const day = Number(dayText);
+    const month = Number(monthText);
+    const year = Number(yearText);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const today = new Date();
+    const todayAtMidnight = Date.UTC(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+    );
+
+    if (
+        year < 1900 ||
+        date.getUTCFullYear() !== year ||
+        date.getUTCMonth() !== month - 1 ||
+        date.getUTCDate() !== day ||
+        date.getTime() >= todayAtMidnight
+    ) {
+        return null;
+    }
+
+    return `${yearText}-${monthText}-${dayText}`;
+};
+
+const readLearnerProfile = (): LearnerProfile | null => {
+    try {
+        const raw = window.localStorage.getItem(PROFILE_STORAGE_KEY);
+        if (!raw) return null;
+
+        const profile = JSON.parse(raw) as Partial<LearnerProfile>;
+        const storedDate =
+            typeof profile.dateOfBirth === "string"
+                ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(profile.dateOfBirth)
+                : null;
+        const validatedDate = storedDate
+            ? parseDateOfBirth(storedDate[3], storedDate[2], storedDate[1])
+            : null;
+
+        if (
+            profile.version !== 1 ||
+            typeof profile.name !== "string" ||
+            !profile.name.trim() ||
+            !validatedDate
+        ) {
+            return null;
+        }
+
+        return {
+            version: 1,
+            name: profile.name.trim(),
+            dateOfBirth: validatedDate,
+        };
+    } catch {
+        return null;
+    }
 };
 
 const wait = (milliseconds: number) =>
@@ -423,8 +546,285 @@ function TrailArtifact({
     );
 }
 
+function DateOfBirthField({
+    value,
+    error,
+    dayRef,
+    onChange,
+}: {
+    value: DateOfBirthParts;
+    error?: string;
+    dayRef: RefObject<HTMLInputElement | null>;
+    onChange: (part: keyof DateOfBirthParts, value: string) => void;
+}) {
+    const describedBy = error
+        ? "learner-date-of-birth-hint learner-date-of-birth-error"
+        : "learner-date-of-birth-hint";
+
+    return (
+        <fieldset className="mt-6">
+            <legend className="mb-2 block text-sm font-semibold text-graphite">
+                Date of birth
+            </legend>
+            <div
+                className={cn(
+                    "flex min-h-12 items-center rounded-lg border bg-paper-inset px-3",
+                    "focus-within:ring-2 focus-within:ring-ink/20",
+                    error
+                        ? "border-coral focus-within:border-coral"
+                        : "border-rule focus-within:border-ink",
+                )}
+            >
+                {DATE_OF_BIRTH_FIELDS.map((field, index) => (
+                    <div key={field.part} className="contents">
+                        {index > 0 ? (
+                            <span aria-hidden="true" className="px-1 text-rule-strong">
+                                /
+                            </span>
+                        ) : null}
+                        <label htmlFor={field.id} className="sr-only">
+                            {field.label}
+                        </label>
+                        <input
+                            ref={field.part === "day" ? dayRef : undefined}
+                            id={field.id}
+                            name={field.name}
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete={field.autoComplete}
+                            maxLength={field.maxLength}
+                            required
+                            value={value[field.part]}
+                            aria-invalid={Boolean(error)}
+                            aria-describedby={describedBy}
+                            onChange={(event) => onChange(field.part, event.target.value)}
+                            className={cn(
+                                field.width,
+                                "border-0 bg-transparent px-1 py-3 text-center text-base text-graphite",
+                                "placeholder:text-graphite-soft focus:outline-none",
+                            )}
+                            placeholder={field.placeholder}
+                        />
+                    </div>
+                ))}
+            </div>
+            <p
+                id="learner-date-of-birth-hint"
+                className="mt-2 text-xs leading-5 text-graphite-soft"
+            >
+                Use day, month, then year.
+            </p>
+            {error ? (
+                <p
+                    id="learner-date-of-birth-error"
+                    role="alert"
+                    className="mt-2 text-sm font-medium text-coral"
+                >
+                    {error}
+                </p>
+            ) : null}
+        </fieldset>
+    );
+}
+
+function OnboardingView({
+    onComplete,
+}: {
+    onComplete: (profile: LearnerProfile) => void;
+}) {
+    const [name, setName] = useState("");
+    const [dateOfBirth, setDateOfBirth] = useState<DateOfBirthParts>({
+        day: "",
+        month: "",
+        year: "",
+    });
+    const [errors, setErrors] = useState<{
+        name?: string;
+        dateOfBirth?: string;
+    }>({});
+    const nameRef = useRef<HTMLInputElement>(null);
+    const dateOfBirthDayRef = useRef<HTMLInputElement>(null);
+
+    const updateDateOfBirth = (part: keyof DateOfBirthParts, value: string) => {
+        setDateOfBirth((current) => ({
+            ...current,
+            [part]: value.replace(/\D/g, "").slice(0, part === "year" ? 4 : 2),
+        }));
+
+        if (errors.dateOfBirth) {
+            setErrors((current) => ({
+                ...current,
+                dateOfBirth: undefined,
+            }));
+        }
+    };
+
+    const submitProfile = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const normalizedName = name.trim().replace(/\s+/g, " ");
+        const normalizedDateOfBirth = parseDateOfBirth(
+            dateOfBirth.day.padStart(2, "0"),
+            dateOfBirth.month.padStart(2, "0"),
+            dateOfBirth.year,
+        );
+        const nextErrors = {
+            name: normalizedName ? undefined : "Enter your name to continue.",
+            dateOfBirth: normalizedDateOfBirth
+                ? undefined
+                : "Enter a valid date in the past.",
+        };
+
+        setErrors(nextErrors);
+
+        if (nextErrors.name) {
+            nameRef.current?.focus();
+            return;
+        }
+
+        if (nextErrors.dateOfBirth || !normalizedDateOfBirth) {
+            dateOfBirthDayRef.current?.focus();
+            return;
+        }
+
+        onComplete({
+            version: 1,
+            name: normalizedName,
+            dateOfBirth: normalizedDateOfBirth,
+        });
+    };
+
+    return (
+        <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
+            <div className="mx-auto max-w-6xl">
+                <header className="border-b border-rule pb-5">
+                    <p className="font-notebook text-2xl font-bold text-graphite">Piblo</p>
+                    <p className="text-xs text-graphite-soft">A learning space that thinks with you</p>
+                </header>
+
+                <div className="grid gap-10 py-10 lg:min-h-[calc(100dvh-7rem)] lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-center lg:gap-16 lg:py-16">
+                    <section className="max-w-2xl">
+                        <p className="text-sm font-bold text-ink">
+                            A guided way to work ideas out
+                        </p>
+                        <h1 className="mt-4 max-w-xl text-balance font-notebook text-4xl font-bold leading-tight text-graphite sm:text-5xl">
+                            Bring what you know. Leave with a clearer idea.
+                        </h1>
+                        <p className="mt-6 max-w-xl text-pretty text-lg leading-8 text-graphite-soft">
+                            Piblo gives you evidence, small challenges, and the right amount of
+                            help while you build an explanation for yourself.
+                        </p>
+
+                        <div className="mt-10 max-w-xl border-l-2 border-ink pl-5">
+                            <p className="text-xs font-bold uppercase tracking-wide text-graphite-soft">
+                                Your thinking trail
+                            </p>
+                            <ol className="mt-3 flex flex-wrap items-center gap-2 font-notebook text-lg font-semibold text-graphite">
+                                <li>Prediction</li>
+                                <li aria-hidden="true" className="text-rule-strong">
+                                    →
+                                </li>
+                                <li>Evidence</li>
+                                <li aria-hidden="true" className="text-rule-strong">
+                                    →
+                                </li>
+                                <li>Explanation</li>
+                            </ol>
+                            <p className="mt-2 text-sm leading-6 text-graphite-soft">
+                                Start with your own idea, then make it stronger.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section
+                        aria-labelledby="onboarding-title"
+                        className="rounded-xl border border-rule bg-paper-raised p-6 sm:p-8"
+                    >
+                        <div className="h-1 w-16 rounded-full bg-ink" aria-hidden="true" />
+                        <p className="mt-7 text-xs font-bold uppercase tracking-wide text-graphite-soft">
+                            Before we begin
+                        </p>
+                        <h2
+                            id="onboarding-title"
+                            className="mt-3 text-balance font-notebook text-3xl font-bold leading-tight text-graphite"
+                        >
+                            Let&apos;s set up your learning space.
+                        </h2>
+                        <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">
+                            No account or password needed. Just tell us what to call you.
+                        </p>
+
+                        <form className="mt-8" noValidate onSubmit={submitProfile}>
+                            <div>
+                                <FieldLabel htmlFor="learner-name">Your name</FieldLabel>
+                                <input
+                                    ref={nameRef}
+                                    id="learner-name"
+                                    name="name"
+                                    type="text"
+                                    autoComplete="name"
+                                    maxLength={80}
+                                    required
+                                    value={name}
+                                    aria-invalid={Boolean(errors.name)}
+                                    aria-describedby={errors.name ? "learner-name-error" : undefined}
+                                    onChange={(event) => {
+                                        setName(event.target.value);
+                                        if (errors.name) {
+                                            setErrors((current) => ({
+                                                ...current,
+                                                name: undefined,
+                                            }));
+                                        }
+                                    }}
+                                    className={cn(
+                                        "min-h-12 w-full rounded-lg border bg-paper-inset px-4 py-3 text-base text-graphite",
+                                        "placeholder:text-graphite-soft focus:outline-none focus:ring-2 focus:ring-ink/20",
+                                        errors.name
+                                            ? "border-coral focus:border-coral"
+                                            : "border-rule focus:border-ink",
+                                    )}
+                                    placeholder="What should Piblo call you?"
+                                />
+                                {errors.name ? (
+                                    <p
+                                        id="learner-name-error"
+                                        role="alert"
+                                        className="mt-2 text-sm font-medium text-coral"
+                                    >
+                                        {errors.name}
+                                    </p>
+                                ) : null}
+                            </div>
+
+                            <DateOfBirthField
+                                value={dateOfBirth}
+                                error={errors.dateOfBirth}
+                                dayRef={dateOfBirthDayRef}
+                                onChange={updateDateOfBirth}
+                            />
+
+                            <button
+                                type="submit"
+                                className="mt-7 min-h-12 w-full rounded-lg bg-graphite px-5 py-3 font-semibold text-paper-raised transition-colors duration-150 hover:bg-ink"
+                            >
+                                Continue to Piblo
+                            </button>
+                            <p className="mt-4 text-center text-xs leading-5 text-graphite-soft">
+                                For this demo, your details stay only in this browser.
+                            </p>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </main>
+    );
+}
+
 export function PibloPrototype() {
-    const [view, setView] = useState<View>("home");
+    const [profile, setProfile] = useState<LearnerProfile | null>(readLearnerProfile);
+    const [view, setView] = useState<View>(profile ? "home" : "onboarding");
+    const [storageWarning, setStorageWarning] = useState(false);
     const [phaseIndex, setPhaseIndex] = useState(0);
     const [grade, setGrade] = useState("Grades 6–8");
     const [goal, setGoal] = useState("Understand the idea");
@@ -437,6 +837,7 @@ export function PibloPrototype() {
     const [trailOpen, setTrailOpen] = useState(false);
     const [failNextTurn, setFailNextTurn] = useState(false);
     const requestId = useRef(0);
+    const homeHeadingRef = useRef<HTMLHeadingElement>(null);
 
     const phase = PHASES[phaseIndex] ?? PHASES[0];
     const busy = status === "assessing" || status === "preparing";
@@ -445,14 +846,33 @@ export function PibloPrototype() {
         setAnswers((current) => ({ ...current, ...update }));
     };
 
-    const saveLesson = (nextPhaseIndex: number, nextAnswers = answers) => {
-        const snapshot: SavedLesson = {
-            phaseIndex: nextPhaseIndex,
-            grade,
-            goal,
-            answers: nextAnswers,
-        };
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+    const completeOnboarding = (nextProfile: LearnerProfile) => {
+        let profileWasStored = true;
+
+        try {
+            window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(nextProfile));
+        } catch {
+            profileWasStored = false;
+        }
+
+        setProfile(nextProfile);
+        setStorageWarning(!profileWasStored);
+        setView("home");
+        window.scrollTo({ top: 0 });
+        window.requestAnimationFrame(() => homeHeadingRef.current?.focus());
+    };
+
+    const resetLearnerProfile = () => {
+        try {
+            window.localStorage.removeItem(PROFILE_STORAGE_KEY);
+        } catch {
+            // The in-memory reset still gives the next learner a clean start.
+        }
+
+        setProfile(null);
+        setStorageWarning(false);
+        setView("onboarding");
+        window.scrollTo({ top: 0 });
     };
 
     const startLesson = () => {
@@ -466,26 +886,6 @@ export function PibloPrototype() {
         setAskAnswer("");
         setView("lesson");
         window.scrollTo({ top: 0 });
-    };
-
-    const resumeLesson = () => {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-            startLesson();
-            return;
-        }
-
-        try {
-            const saved = JSON.parse(raw) as SavedLesson;
-            setAnswers(saved.answers);
-            setPhaseIndex(Math.min(saved.phaseIndex, PHASES.length - 1));
-            setGrade(saved.grade);
-            setGoal(saved.goal);
-            setView("lesson");
-            window.scrollTo({ top: 0 });
-        } catch {
-            startLesson();
-        }
     };
 
     const canSubmit = (() => {
@@ -538,10 +938,8 @@ export function PibloPrototype() {
 
         const nextPhaseIndex = phaseIndex + 1;
         if (nextPhaseIndex >= PHASES.length) {
-            saveLesson(PHASES.length - 1);
             setView("complete");
         } else {
-            saveLesson(nextPhaseIndex);
             setPhaseIndex(nextPhaseIndex);
             setSupportLevel(0);
             setAskOpen(false);
@@ -589,24 +987,42 @@ export function PibloPrototype() {
         answers.reflection.trim() ? "You explained how your thinking changed." : undefined,
     ];
 
+    if (view === "onboarding") {
+        return <OnboardingView onComplete={completeOnboarding} />;
+    }
+
     if (view === "home") {
+        const firstName = profile?.name.split(/\s+/)[0];
+
         return (
             <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
                 <div className="mx-auto max-w-6xl">
-                    <header className="flex items-center justify-between border-b border-rule pb-5">
+                    <header className="flex items-center justify-between gap-4 border-b border-rule pb-5">
                         <div>
                             <p className="font-notebook text-2xl font-bold text-graphite">Piblo</p>
                             <p className="text-xs text-graphite-muted">Learning workspace prototype</p>
                         </div>
-                        <span className="rounded-full border border-rule bg-paper-raised px-3 py-1 text-xs font-semibold text-graphite-soft">
-                            Lo-fi
-                        </span>
+                        <button
+                            type="button"
+                            onClick={resetLearnerProfile}
+                            className="rounded-lg border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-graphite-soft transition-colors duration-150 hover:border-rule-strong hover:text-graphite"
+                        >
+                            Not {firstName ?? "you"}?
+                        </button>
                     </header>
 
                     <div className="grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-start lg:gap-16 lg:py-20">
                         <section className="max-w-2xl">
-                            <p className="text-sm font-bold text-ink">A guided way to work ideas out</p>
-                            <h1 className="mt-4 max-w-xl text-balance font-notebook text-4xl font-bold leading-tight text-graphite sm:text-5xl">
+                            <p className="text-sm font-bold text-ink">
+                                {firstName
+                                    ? `Welcome, ${firstName}`
+                                    : "A guided way to work ideas out"}
+                            </p>
+                            <h1
+                                ref={homeHeadingRef}
+                                tabIndex={-1}
+                                className="mt-4 max-w-xl text-balance font-notebook text-4xl font-bold leading-tight text-graphite focus:outline-none sm:text-5xl"
+                            >
                                 Don&apos;t just get the answer. See your thinking change.
                             </h1>
                             <p className="mt-6 max-w-xl text-pretty text-lg leading-8 text-graphite-soft">
@@ -632,73 +1048,79 @@ export function PibloPrototype() {
                             </ol>
                         </section>
 
-                        <section
-                            aria-labelledby="lesson-card-title"
-                            className="rounded-xl border border-rule bg-paper-raised p-6 sm:p-8"
-                        >
-                            <p className="text-xs font-bold uppercase text-graphite-muted">
-                                First lesson
-                            </p>
-                            <h2
-                                id="lesson-card-title"
-                                className="mt-3 text-balance font-notebook text-3xl font-bold text-graphite"
-                            >
-                                Where does a plant&apos;s mass come from?
-                            </h2>
-                            <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">
-                                Build an explanation of photosynthesis through one prediction,
-                                one surprising observation, and one new situation.
-                            </p>
-
-                            <fieldset className="mt-7">
-                                <legend className="text-sm font-semibold text-graphite">
-                                    Learning level
-                                </legend>
-                                <div className="mt-3 grid grid-cols-2 gap-2">
-                                    {["Grades 6–8", "Grades 9–10"].map((option) => (
-                                        <OptionButton
-                                            key={option}
-                                            selected={grade === option}
-                                            onClick={() => setGrade(option)}
-                                        >
-                                            {option}
-                                        </OptionButton>
-                                    ))}
+                        <div>
+                            {storageWarning ? (
+                                <div
+                                    role="status"
+                                    className="mb-4 rounded-lg border border-amber-ink/25 bg-amber-note px-4 py-3 text-sm leading-6 text-graphite"
+                                >
+                                    You can continue, but this browser won&apos;t remember your
+                                    details.
                                 </div>
-                            </fieldset>
-
-                            <fieldset className="mt-6">
-                                <legend className="text-sm font-semibold text-graphite">
-                                    What do you want from this lesson?
-                                </legend>
-                                <div className="mt-3 grid gap-2">
-                                    {["Understand the idea", "Prepare for class"].map((option) => (
-                                        <OptionButton
-                                            key={option}
-                                            selected={goal === option}
-                                            onClick={() => setGoal(option)}
-                                        >
-                                            {option}
-                                        </OptionButton>
-                                    ))}
-                                </div>
-                            </fieldset>
-
-                            <button
-                                type="button"
-                                onClick={startLesson}
-                                className="mt-7 w-full rounded-lg bg-graphite px-5 py-3 font-semibold text-paper-raised"
+                            ) : null}
+                            <section
+                                aria-labelledby="lesson-card-title"
+                                className="rounded-xl border border-rule bg-paper-raised p-6 sm:p-8"
                             >
-                                Start with a prediction
-                            </button>
-                            <button
-                                type="button"
-                                onClick={resumeLesson}
-                                className="mt-3 w-full rounded-lg border border-rule-strong bg-paper-raised px-5 py-3 text-sm font-semibold text-graphite"
-                            >
-                                Resume saved work
-                            </button>
-                        </section>
+                                <p className="text-xs font-bold uppercase text-graphite-muted">
+                                    First lesson
+                                </p>
+                                <h2
+                                    id="lesson-card-title"
+                                    className="mt-3 text-balance font-notebook text-3xl font-bold text-graphite"
+                                >
+                                    Where does a plant&apos;s mass come from?
+                                </h2>
+                                <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">
+                                    Build an explanation of photosynthesis through one prediction,
+                                    one surprising observation, and one new situation.
+                                </p>
+
+                                <fieldset className="mt-7">
+                                    <legend className="text-sm font-semibold text-graphite">
+                                        Learning level
+                                    </legend>
+                                    <div className="mt-3 grid grid-cols-2 gap-2">
+                                        {["Grades 6–8", "Grades 9–10"].map((option) => (
+                                            <OptionButton
+                                                key={option}
+                                                selected={grade === option}
+                                                onClick={() => setGrade(option)}
+                                            >
+                                                {option}
+                                            </OptionButton>
+                                        ))}
+                                    </div>
+                                </fieldset>
+
+                                <fieldset className="mt-6">
+                                    <legend className="text-sm font-semibold text-graphite">
+                                        What do you want from this lesson?
+                                    </legend>
+                                    <div className="mt-3 grid gap-2">
+                                        {["Understand the idea", "Prepare for class"].map(
+                                            (option) => (
+                                                <OptionButton
+                                                    key={option}
+                                                    selected={goal === option}
+                                                    onClick={() => setGoal(option)}
+                                                >
+                                                    {option}
+                                                </OptionButton>
+                                            ),
+                                        )}
+                                    </div>
+                                </fieldset>
+
+                                <button
+                                    type="button"
+                                    onClick={startLesson}
+                                    className="mt-7 w-full rounded-lg bg-graphite px-5 py-3 font-semibold text-paper-raised"
+                                >
+                                    Start with a prediction
+                                </button>
+                            </section>
+                        </div>
                     </div>
                 </div>
             </main>
