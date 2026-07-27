@@ -34,10 +34,16 @@ OpenAI-compatible gateway — subscribe at https://opencode.ai/docs/go/).
 ```bash
 cd prototype
 npm install
+npm run dev     # open the clickable lo-fi learning workspace
 npm run demo    # scripted student: starts wrong ("plants eat soil"), learns
 npm run chat    # talk to the tutor yourself; /state shows the learner model
 npx tsc --noEmit   # typecheck
 ```
+
+The browser prototype runs at `http://localhost:5173`. It uses deterministic
+mock lesson state rather than live model calls, so the complete interaction flow
+can be reviewed without consuming AI credits. The implementation follows the
+[Piblo Interaction Design Specification](./docs/interaction-design-specification.md).
 
 The tutor defaults to `glm-5.2` (needs to hold the Socratic line under
 an instruction-heavy prompt); the analyzer defaults to `deepseek-v4-flash`
@@ -46,16 +52,17 @@ an instruction-heavy prompt); the analyzer defaults to `deepseek-v4-flash`
 `/v1/models`). Swapping to Anthropic/Google/OpenAI later is a one-file edit in
 `src/llm/index.ts`.
 
-## Layout (maps 1:1 onto the future Next.js `lib/`)
+## Layout
 
-| File | Role | Future home |
-|------|------|-------------|
-| `src/llm/` | provider registry: `getTutorModel()` / `getAnalyzerModel()` return Vercel AI SDK models | `lib/llm/` |
-| `src/concept/photosynthesis.ts` | concept graph: objectives + misconceptions | DB seed + `lib/concept/` |
-| `src/tutor/prompts.ts` | Socratic tutor + analyzer system prompts | `lib/tutor/` |
-| `src/tutor/loop.ts` | orchestration: `tutorTurn`, `analyzeTurn`, `applyAnalysis` | API route handlers |
-| `src/tutor/types.ts` | `LearnerModel` shape | DB schema |
-| `src/harness.ts` / `src/demo.ts` | CLI drivers | replaced by the chat UI |
+| File | Role |
+|------|------|
+| `src/llm/` | provider registry: `getTutorModel()` / `getAnalyzerModel()` return Vercel AI SDK models |
+| `src/concept/photosynthesis.ts` | concept graph: objectives + misconceptions |
+| `src/tutor/prompts.ts` | Socratic tutor + analyzer system prompts |
+| `src/tutor/loop.ts` | orchestration: `tutorTurn`, `analyzeTurn`, `applyAnalysis` |
+| `src/tutor/types.ts` | `LearnerModel` shape |
+| `src/harness.ts` / `src/demo.ts` | CLI drivers retained as engine test harnesses |
+| `app/` | React lo-fi adaptive learning workspace |
 
 ## What this validates
 
@@ -69,7 +76,8 @@ an instruction-heavy prompt); the analyzer defaults to `deepseek-v4-flash`
 
 ## Next step toward the product
 
-`docs/` build order: scaffold Next.js → move `src/` into `lib/` → wrap `loop.ts` in
-an API route → build the single-page chat UI ("What do you want to learn today?" →
-Photosynthesis card → chat) → persist the Learner Model in Supabase → mastery
-dashboard → recall scheduler.
+Use the confirmed interaction prototype as the client foundation → expose the
+tutor loop through a server API → replace deterministic moves with validated
+structured tutor moves → persist the learner model → add recall and review
+flows. See [future-scope-todo.md](./docs/future-scope-todo.md) for the full
+roadmap.

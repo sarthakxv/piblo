@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+    --color-paper: #f3f0e8;
+    --color-paper-raised: #fbfaf6;
+    --color-paper-inset: #ebe7dd;
+    --color-graphite: #2f352f;
+    --color-graphite-soft: #596158;
+    --color-graphite-muted: #7f857c;
+    --color-rule: #d7d1c4;
+    --color-rule-strong: #aaa394;
+    --color-ink: #285f88;
+    --color-ink-soft: #dbe8f1;
+    --color-amber-note: #f6e4ae;
+    --color-amber-ink: #765b17;
+    --color-moss: #5d7458;
+    --color-moss-soft: #e1e9de;
+    --color-coral: #9b5548;
+    --color-coral-soft: #f4e2de;
+    --font-sans: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+    --font-notebook: Iowan Old Style, "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+:root {
+    color-scheme: light;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--color-paper);
+}
+
+body {
+    min-height: 100dvh;
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-graphite);
+    font-family: var(--font-sans);
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+button,
+[role="button"] {
+    -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+    background: var(--color-ink-soft);
+    color: var(--color-graphite);
+}
+
+:focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
