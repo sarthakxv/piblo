@@ -9,7 +9,7 @@ import {
 } from "react";
 import { cn } from "../lib/cn";
 
-type View = "onboarding" | "home" | "lesson" | "complete";
+type View = "onboarding" | "library" | "lesson" | "complete";
 type TurnStatus = "idle" | "assessing" | "preparing" | "error";
 type Confidence = "Guessing" | "Somewhat sure" | "Sure";
 type RelationshipAnswer = "part" | "not-part";
@@ -53,7 +53,177 @@ interface PhaseDefinition {
     eyebrow: string;
 }
 
+interface LessonDefinition {
+    id: string;
+    title: string;
+    description: string;
+    available?: boolean;
+}
+
+interface LevelDefinition {
+    id: string;
+    name: string;
+    description: string;
+    lessons: LessonDefinition[];
+}
+
+interface TopicDefinition {
+    id: string;
+    name: string;
+    description: string;
+    levels: LevelDefinition[];
+}
+
 const PROFILE_STORAGE_KEY = "piblo-demo-profile-v1";
+
+const TOPICS: TopicDefinition[] = [
+    {
+        id: "photosynthesis",
+        name: "Photosynthesis",
+        description: "Follow matter and energy as plants build the material they need.",
+        levels: [
+            {
+                id: "notice-the-puzzle",
+                name: "Notice the puzzle",
+                description: "Begin with the surprising question behind plant growth.",
+                lessons: [
+                    {
+                        id: "plant-mass",
+                        title: "Where does a plant's mass come from?",
+                        description: "Make a prediction, examine evidence, and revise your model.",
+                        available: true,
+                    },
+                    {
+                        id: "van-helmont",
+                        title: "A tree, a pot, and five years",
+                        description: "Use a classic investigation to challenge the soil explanation.",
+                    },
+                ],
+            },
+            {
+                id: "trace-the-inputs",
+                name: "Trace the inputs",
+                description: "Work out what enters a plant and what each input contributes.",
+                lessons: [
+                    {
+                        id: "matter-from-air",
+                        title: "Can solid material come from air?",
+                        description: "Track the carbon in carbon dioxide into plant tissue.",
+                    },
+                    {
+                        id: "water-role",
+                        title: "What role does water play?",
+                        description: "Separate water's role as matter from its role in transport.",
+                    },
+                    {
+                        id: "light-energy",
+                        title: "Is sunlight food?",
+                        description: "Distinguish energy entering a system from matter entering it.",
+                    },
+                ],
+            },
+            {
+                id: "build-the-model",
+                name: "Build the model",
+                description: "Connect matter, energy, and chemical change into one explanation.",
+                lessons: [
+                    {
+                        id: "photosynthesis-model",
+                        title: "Build a photosynthesis model",
+                        description: "Explain how the inputs become glucose and oxygen.",
+                    },
+                    {
+                        id: "darkness-transfer",
+                        title: "What changes in darkness?",
+                        description: "Apply the model to a plant without light.",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: "cells",
+        name: "Cells & systems",
+        description: "Move from individual cells to the systems they build together.",
+        levels: [
+            {
+                id: "cell-patterns",
+                name: "Spot the patterns",
+                description: "Compare cells and identify the structures they share.",
+                lessons: [
+                    {
+                        id: "cell-boundary",
+                        title: "What makes a cell a cell?",
+                        description: "Look for the common boundaries and internal structures.",
+                    },
+                    {
+                        id: "cell-scale",
+                        title: "How small is a cell?",
+                        description: "Use scale to connect what we see to what is actually there.",
+                    },
+                ],
+            },
+            {
+                id: "specialization",
+                name: "Explain specialization",
+                description: "Connect a cell's structure to the work it can do.",
+                lessons: [
+                    {
+                        id: "shape-and-job",
+                        title: "Why do cells have different shapes?",
+                        description: "Compare form and function across specialized cells.",
+                    },
+                    {
+                        id: "tissues",
+                        title: "When cells work together",
+                        description: "Build the path from cells to tissues and organs.",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: "forces",
+        name: "Forces & motion",
+        description: "Use patterns in motion to reason about pushes, pulls, and change.",
+        levels: [
+            {
+                id: "describe-motion",
+                name: "Describe motion",
+                description: "Notice what must be measured before motion can be explained.",
+                lessons: [
+                    {
+                        id: "reference-points",
+                        title: "Moving compared with what?",
+                        description: "Use reference points to make motion descriptions precise.",
+                    },
+                    {
+                        id: "motion-graphs",
+                        title: "Tell a motion story from a graph",
+                        description: "Translate position and time into a changing journey.",
+                    },
+                ],
+            },
+            {
+                id: "explain-change",
+                name: "Explain change",
+                description: "Connect balanced and unbalanced forces to changes in motion.",
+                lessons: [
+                    {
+                        id: "balanced-forces",
+                        title: "Can forces act without motion changing?",
+                        description: "Reason about situations where forces balance.",
+                    },
+                    {
+                        id: "net-force",
+                        title: "Which way will it change?",
+                        description: "Use net force to predict changes in motion.",
+                    },
+                ],
+            },
+        ],
+    },
+];
 
 const DATE_OF_BIRTH_FIELDS: Array<{
     part: keyof DateOfBirthParts;
@@ -821,13 +991,361 @@ function OnboardingView({
     );
 }
 
+function TopicPickerPanel({
+    selectedTopic,
+    onSelectTopic,
+}: {
+    selectedTopic: TopicDefinition;
+    onSelectTopic: (topicId: string) => void;
+}) {
+    const [exploreNoticeVisible, setExploreNoticeVisible] = useState(false);
+    const topicPickerRef = useRef<HTMLDetailsElement>(null);
+    const topicSummaryRef = useRef<HTMLElement>(null);
+
+    const selectTopic = (topicId: string) => {
+        onSelectTopic(topicId);
+        setExploreNoticeVisible(false);
+
+        if (topicPickerRef.current) {
+            topicPickerRef.current.open = false;
+        }
+
+        window.requestAnimationFrame(() => topicSummaryRef.current?.focus());
+    };
+
+    return (
+        <aside className="flex flex-col border-b border-rule bg-paper-inset/55 p-5 sm:p-7 lg:border-b-0 lg:border-r">
+            <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-graphite-soft">
+                    Topic
+                </p>
+                <details ref={topicPickerRef} className="group relative mt-3">
+                    <summary
+                        ref={topicSummaryRef}
+                        className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 rounded-lg border border-rule-strong bg-paper-raised px-4 py-3 font-semibold text-graphite transition-colors duration-150 marker:content-none hover:border-ink [&::-webkit-details-marker]:hidden"
+                    >
+                        <span>{selectedTopic.name}</span>
+                        <svg
+                            aria-hidden="true"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            className="h-5 w-5 shrink-0 text-graphite-muted transition-transform duration-150 group-open:rotate-180"
+                        >
+                            <path
+                                d="m5 7.5 5 5 5-5"
+                                stroke="currentColor"
+                                strokeWidth="1.75"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </summary>
+                    <div className="absolute z-20 mt-2 w-full rounded-lg border border-rule bg-paper-raised p-2">
+                        {TOPICS.map((topic) => {
+                            const selected = topic.id === selectedTopic.id;
+
+                            return (
+                                <button
+                                    key={topic.id}
+                                    type="button"
+                                    aria-pressed={selected}
+                                    onClick={() => selectTopic(topic.id)}
+                                    className={cn(
+                                        "w-full rounded-md px-3 py-3 text-left transition-colors duration-150",
+                                        selected
+                                            ? "bg-ink-soft text-graphite"
+                                            : "text-graphite-soft hover:bg-paper-inset hover:text-graphite",
+                                    )}
+                                >
+                                    <span className="block text-sm font-semibold">
+                                        {topic.name}
+                                    </span>
+                                    <span className="mt-1 block text-xs leading-5 text-graphite-soft">
+                                        {topic.levels.length} levels
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </details>
+
+                <p className="mt-4 text-sm leading-6 text-graphite-soft">
+                    {selectedTopic.description}
+                </p>
+            </div>
+
+            <div className="mt-8 lg:mt-auto lg:pt-8">
+                {exploreNoticeVisible ? (
+                    <p
+                        id="explore-topics-notice"
+                        role="status"
+                        className="mb-3 text-xs leading-5 text-graphite-soft"
+                    >
+                        The full topic explorer is coming in the next iteration.
+                    </p>
+                ) : null}
+                <button
+                    type="button"
+                    aria-describedby={
+                        exploreNoticeVisible ? "explore-topics-notice" : undefined
+                    }
+                    onClick={() => setExploreNoticeVisible(true)}
+                    className="min-h-12 w-full rounded-lg border border-rule-strong bg-paper-raised px-4 py-3 text-sm font-semibold text-graphite transition-colors duration-150 hover:border-ink hover:text-ink"
+                >
+                    Explore topics
+                </button>
+            </div>
+        </aside>
+    );
+}
+
+function TopicLearningPath({
+    topic,
+    expandedLevelId,
+    onToggleLevel,
+    onStartLesson,
+}: {
+    topic: TopicDefinition;
+    expandedLevelId: string | null;
+    onToggleLevel: (levelId: string) => void;
+    onStartLesson: () => void;
+}) {
+    return (
+        <section aria-labelledby="topic-path-title" className="min-w-0 p-5 sm:p-7 lg:p-9">
+            <div className="border-b border-rule pb-6">
+                <p className="text-xs font-bold uppercase tracking-wide text-graphite-soft">
+                    Learning path
+                </p>
+                <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+                    <h2
+                        id="topic-path-title"
+                        className="font-notebook text-3xl font-bold text-graphite"
+                    >
+                        {topic.name}
+                    </h2>
+                    <p className="text-xs font-semibold text-graphite-soft">
+                        {topic.levels.length} levels
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-3">
+                {topic.levels.map((level, index) => {
+                    const expanded = level.id === expandedLevelId;
+                    const levelPanelId = `level-${topic.id}-${level.id}`;
+
+                    return (
+                        <article key={level.id} className="border-b border-rule last:border-b-0">
+                            <button
+                                type="button"
+                                aria-expanded={expanded}
+                                aria-controls={levelPanelId}
+                                onClick={() => onToggleLevel(level.id)}
+                                className={cn(
+                                    "group flex w-full items-center gap-4 px-1 py-5 text-left transition-colors duration-150 sm:px-3",
+                                    expanded
+                                        ? "text-ink"
+                                        : "text-graphite hover:text-ink",
+                                )}
+                            >
+                                <span
+                                    aria-hidden="true"
+                                    className={cn(
+                                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border font-notebook text-sm font-bold tabular-nums",
+                                        expanded
+                                            ? "border-ink bg-ink text-paper-raised"
+                                            : "border-rule-strong bg-paper text-graphite-soft",
+                                    )}
+                                >
+                                    {index + 1}
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                    <span className="block font-notebook text-xl font-bold">
+                                        {level.name}
+                                    </span>
+                                    <span className="mt-1 block text-sm leading-6 text-graphite-soft">
+                                        {level.description}
+                                    </span>
+                                </span>
+                                <span className="flex shrink-0 items-center gap-3">
+                                    <span className="hidden text-xs font-semibold text-graphite-soft sm:block">
+                                        {level.lessons.length} lessons
+                                    </span>
+                                    <svg
+                                        aria-hidden="true"
+                                        viewBox="0 0 20 20"
+                                        fill="none"
+                                        className={cn(
+                                            "h-5 w-5 text-graphite-muted transition-transform duration-150",
+                                            expanded && "rotate-180",
+                                        )}
+                                    >
+                                        <path
+                                            d="m5 7.5 5 5 5-5"
+                                            stroke="currentColor"
+                                            strokeWidth="1.75"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <div
+                                id={levelPanelId}
+                                hidden={!expanded}
+                                className="mb-5 ml-5 border-l-2 border-ink/30 pl-7 sm:ml-7 sm:pl-9"
+                            >
+                                {expanded ? (
+                                    <ol className="grid gap-2">
+                                        {level.lessons.map((lesson, lessonIndex) => (
+                                            <li key={lesson.id}>
+                                                <button
+                                                    type="button"
+                                                    disabled={!lesson.available}
+                                                    onClick={
+                                                        lesson.available
+                                                            ? onStartLesson
+                                                            : undefined
+                                                    }
+                                                    className={cn(
+                                                        "flex w-full items-start gap-4 rounded-lg border px-4 py-3 text-left transition-colors duration-150",
+                                                        lesson.available
+                                                            ? "border-ink/35 bg-ink-soft hover:border-ink"
+                                                            : "cursor-not-allowed border-transparent bg-paper text-graphite-soft",
+                                                    )}
+                                                >
+                                                    <span className="pt-0.5 font-notebook text-sm font-bold tabular-nums text-graphite-soft">
+                                                        {index + 1}.{lessonIndex + 1}
+                                                    </span>
+                                                    <span className="min-w-0 flex-1">
+                                                        <span className="flex flex-wrap items-center justify-between gap-2">
+                                                            <span className="font-semibold text-graphite">
+                                                                {lesson.title}
+                                                            </span>
+                                                            <span
+                                                                className={cn(
+                                                                    "text-[0.6875rem] font-bold uppercase tracking-wide",
+                                                                    lesson.available
+                                                                        ? "text-ink"
+                                                                        : "text-graphite-muted",
+                                                                )}
+                                                            >
+                                                                {lesson.available
+                                                                    ? "Start lesson"
+                                                                    : "Soon"}
+                                                            </span>
+                                                        </span>
+                                                        <span className="mt-1 block text-xs leading-5 text-graphite-soft">
+                                                            {lesson.description}
+                                                        </span>
+                                                    </span>
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                ) : null}
+                            </div>
+                        </article>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
+function LearningLibrary({
+    profile,
+    storageWarning,
+    headingRef,
+    onResetProfile,
+    onStartLesson,
+}: {
+    profile: LearnerProfile | null;
+    storageWarning: boolean;
+    headingRef: RefObject<HTMLHeadingElement | null>;
+    onResetProfile: () => void;
+    onStartLesson: () => void;
+}) {
+    const [selectedTopicId, setSelectedTopicId] = useState(TOPICS[0].id);
+    const [expandedLevelId, setExpandedLevelId] = useState<string | null>(null);
+    const firstName = profile?.name.split(/\s+/)[0];
+    const selectedTopic =
+        TOPICS.find((topic) => topic.id === selectedTopicId) ?? TOPICS[0];
+
+    const selectTopic = (topicId: string) => {
+        setSelectedTopicId(topicId);
+        setExpandedLevelId(null);
+    };
+
+    return (
+        <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
+            <div className="mx-auto max-w-6xl">
+                <header className="flex items-center justify-between gap-4 border-b border-rule pb-5">
+                    <div>
+                        <p className="font-notebook text-2xl font-bold text-graphite">Piblo</p>
+                        <p className="text-xs text-graphite-muted">Learning workspace prototype</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onResetProfile}
+                        className="rounded-lg border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-graphite-soft transition-colors duration-150 hover:border-rule-strong hover:text-graphite"
+                    >
+                        Not {firstName ?? "you"}?
+                    </button>
+                </header>
+
+                <section className="py-8 sm:py-12 lg:py-16" aria-labelledby="library-title">
+                    <div className="mb-7 sm:mb-9">
+                        <p className="text-sm font-bold text-ink">
+                            {firstName ? `Welcome, ${firstName}` : "Your learning library"}
+                        </p>
+                        <h1
+                            ref={headingRef}
+                            id="library-title"
+                            tabIndex={-1}
+                            className="mt-2 max-w-3xl text-balance font-notebook text-3xl font-bold leading-tight text-graphite focus:outline-none sm:text-4xl"
+                        >
+                            Choose a topic, then follow the idea as far as you want.
+                        </h1>
+                    </div>
+
+                    {storageWarning ? (
+                        <div
+                            role="status"
+                            className="mb-4 rounded-lg border border-amber-ink/25 bg-amber-note px-4 py-3 text-sm leading-6 text-graphite"
+                        >
+                            You can continue, but this browser won&apos;t remember your details.
+                        </div>
+                    ) : null}
+
+                    <div className="overflow-hidden rounded-xl border border-rule bg-paper-raised lg:grid lg:min-h-[36rem] lg:grid-cols-[20rem_minmax(0,1fr)]">
+                        <TopicPickerPanel
+                            selectedTopic={selectedTopic}
+                            onSelectTopic={selectTopic}
+                        />
+                        <TopicLearningPath
+                            topic={selectedTopic}
+                            expandedLevelId={expandedLevelId}
+                            onToggleLevel={(levelId) =>
+                                setExpandedLevelId((current) =>
+                                    current === levelId ? null : levelId,
+                                )
+                            }
+                            onStartLesson={onStartLesson}
+                        />
+                    </div>
+                </section>
+            </div>
+        </main>
+    );
+}
+
 export function PibloPrototype() {
     const [profile, setProfile] = useState<LearnerProfile | null>(readLearnerProfile);
-    const [view, setView] = useState<View>(profile ? "home" : "onboarding");
+    const [view, setView] = useState<View>(profile ? "library" : "onboarding");
     const [storageWarning, setStorageWarning] = useState(false);
     const [phaseIndex, setPhaseIndex] = useState(0);
-    const [grade, setGrade] = useState("Grades 6–8");
-    const [goal, setGoal] = useState("Understand the idea");
     const [answers, setAnswers] = useState<LessonAnswers>(EMPTY_ANSWERS);
     const [supportLevel, setSupportLevel] = useState(0);
     const [status, setStatus] = useState<TurnStatus>("idle");
@@ -837,7 +1355,7 @@ export function PibloPrototype() {
     const [trailOpen, setTrailOpen] = useState(false);
     const [failNextTurn, setFailNextTurn] = useState(false);
     const requestId = useRef(0);
-    const homeHeadingRef = useRef<HTMLHeadingElement>(null);
+    const libraryHeadingRef = useRef<HTMLHeadingElement>(null);
 
     const phase = PHASES[phaseIndex] ?? PHASES[0];
     const busy = status === "assessing" || status === "preparing";
@@ -857,9 +1375,9 @@ export function PibloPrototype() {
 
         setProfile(nextProfile);
         setStorageWarning(!profileWasStored);
-        setView("home");
+        setView("library");
         window.scrollTo({ top: 0 });
-        window.requestAnimationFrame(() => homeHeadingRef.current?.focus());
+        window.requestAnimationFrame(() => libraryHeadingRef.current?.focus());
     };
 
     const resetLearnerProfile = () => {
@@ -991,139 +1509,15 @@ export function PibloPrototype() {
         return <OnboardingView onComplete={completeOnboarding} />;
     }
 
-    if (view === "home") {
-        const firstName = profile?.name.split(/\s+/)[0];
-
+    if (view === "library") {
         return (
-            <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
-                <div className="mx-auto max-w-6xl">
-                    <header className="flex items-center justify-between gap-4 border-b border-rule pb-5">
-                        <div>
-                            <p className="font-notebook text-2xl font-bold text-graphite">Piblo</p>
-                            <p className="text-xs text-graphite-muted">Learning workspace prototype</p>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={resetLearnerProfile}
-                            className="rounded-lg border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-graphite-soft transition-colors duration-150 hover:border-rule-strong hover:text-graphite"
-                        >
-                            Not {firstName ?? "you"}?
-                        </button>
-                    </header>
-
-                    <div className="grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-start lg:gap-16 lg:py-20">
-                        <section className="max-w-2xl">
-                            <p className="text-sm font-bold text-ink">
-                                {firstName
-                                    ? `Welcome, ${firstName}`
-                                    : "A guided way to work ideas out"}
-                            </p>
-                            <h1
-                                ref={homeHeadingRef}
-                                tabIndex={-1}
-                                className="mt-4 max-w-xl text-balance font-notebook text-4xl font-bold leading-tight text-graphite focus:outline-none sm:text-5xl"
-                            >
-                                Don&apos;t just get the answer. See your thinking change.
-                            </h1>
-                            <p className="mt-6 max-w-xl text-pretty text-lg leading-8 text-graphite-soft">
-                                Piblo gives you evidence, diagrams, and small challenges while
-                                adapting the amount of help along the way.
-                            </p>
-
-                            <ol className="mt-10 grid gap-4 sm:grid-cols-3">
-                                {[
-                                    ["1", "Make a prediction"],
-                                    ["2", "Work with evidence"],
-                                    ["3", "Apply the idea"],
-                                ].map(([number, label]) => (
-                                    <li key={number} className="border-l-2 border-rule pl-4">
-                                        <p className="tabular-nums text-xs font-bold text-graphite-muted">
-                                            {number}
-                                        </p>
-                                        <p className="mt-1 text-sm font-semibold text-graphite">
-                                            {label}
-                                        </p>
-                                    </li>
-                                ))}
-                            </ol>
-                        </section>
-
-                        <div>
-                            {storageWarning ? (
-                                <div
-                                    role="status"
-                                    className="mb-4 rounded-lg border border-amber-ink/25 bg-amber-note px-4 py-3 text-sm leading-6 text-graphite"
-                                >
-                                    You can continue, but this browser won&apos;t remember your
-                                    details.
-                                </div>
-                            ) : null}
-                            <section
-                                aria-labelledby="lesson-card-title"
-                                className="rounded-xl border border-rule bg-paper-raised p-6 sm:p-8"
-                            >
-                                <p className="text-xs font-bold uppercase text-graphite-muted">
-                                    First lesson
-                                </p>
-                                <h2
-                                    id="lesson-card-title"
-                                    className="mt-3 text-balance font-notebook text-3xl font-bold text-graphite"
-                                >
-                                    Where does a plant&apos;s mass come from?
-                                </h2>
-                                <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">
-                                    Build an explanation of photosynthesis through one prediction,
-                                    one surprising observation, and one new situation.
-                                </p>
-
-                                <fieldset className="mt-7">
-                                    <legend className="text-sm font-semibold text-graphite">
-                                        Learning level
-                                    </legend>
-                                    <div className="mt-3 grid grid-cols-2 gap-2">
-                                        {["Grades 6–8", "Grades 9–10"].map((option) => (
-                                            <OptionButton
-                                                key={option}
-                                                selected={grade === option}
-                                                onClick={() => setGrade(option)}
-                                            >
-                                                {option}
-                                            </OptionButton>
-                                        ))}
-                                    </div>
-                                </fieldset>
-
-                                <fieldset className="mt-6">
-                                    <legend className="text-sm font-semibold text-graphite">
-                                        What do you want from this lesson?
-                                    </legend>
-                                    <div className="mt-3 grid gap-2">
-                                        {["Understand the idea", "Prepare for class"].map(
-                                            (option) => (
-                                                <OptionButton
-                                                    key={option}
-                                                    selected={goal === option}
-                                                    onClick={() => setGoal(option)}
-                                                >
-                                                    {option}
-                                                </OptionButton>
-                                            ),
-                                        )}
-                                    </div>
-                                </fieldset>
-
-                                <button
-                                    type="button"
-                                    onClick={startLesson}
-                                    className="mt-7 w-full rounded-lg bg-graphite px-5 py-3 font-semibold text-paper-raised"
-                                >
-                                    Start with a prediction
-                                </button>
-                            </section>
-                        </div>
-                    </div>
-                </div>
-            </main>
+            <LearningLibrary
+                profile={profile}
+                storageWarning={storageWarning}
+                headingRef={libraryHeadingRef}
+                onResetProfile={resetLearnerProfile}
+                onStartLesson={startLesson}
+            />
         );
     }
 
@@ -1186,12 +1580,12 @@ export function PibloPrototype() {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setView("home");
+                                    setView("library");
                                     window.scrollTo({ top: 0 });
                                 }}
                                 className="rounded-lg border border-rule-strong bg-paper-raised px-5 py-3 font-semibold text-graphite"
                             >
-                                Return home
+                                Browse more lessons
                             </button>
                         </div>
                     </section>
@@ -1208,7 +1602,7 @@ export function PibloPrototype() {
                         <button
                             type="button"
                             onClick={() => {
-                                setView("home");
+                                setView("library");
                                 window.scrollTo({ top: 0 });
                             }}
                             className="font-notebook text-xl font-bold text-graphite"
