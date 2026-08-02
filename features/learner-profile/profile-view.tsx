@@ -5,15 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+    AlertDialog,
+    AlertDialogClose,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { PHASES } from "@/domain/lesson/types.ts";
 import { clearSession, readSession } from "@/features/session/session-storage.ts";
 import type { Session } from "@/features/session/session-schema.ts";
@@ -59,8 +59,8 @@ export function ProfileView() {
                         <Link href="/library" className="font-notebook text-2xl font-bold text-graphite">Piblo</Link>
                         <p className="text-xs text-graphite-muted">Learner profile</p>
                     </div>
-                    <Button asChild variant="outline" className="border-rule-strong bg-paper-raised">
-                        <Link href="/library">Back to library</Link>
+                    <Button render={<Link href="/library" />} variant="outline" className="border-rule-strong bg-paper-raised">
+                        Back to library
                     </Button>
                 </header>
 
@@ -90,15 +90,15 @@ export function ProfileView() {
                                 <>
                                     <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{session.complete ? "Lesson complete" : phase?.learnerLabel}</p>
                                     <p className="mt-2 text-sm leading-6 text-graphite-soft">{completedArtifacts} of {PHASES.length} Thinking Trail artifacts completed.</p>
-                                    <Button asChild className="mt-5 bg-graphite text-paper-raised">
-                                        <Link href="/learn/plant-mass">{session.complete ? "Review lesson" : "Resume lesson"}</Link>
+                                    <Button render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">
+                                        {session.complete ? "Review lesson" : "Resume lesson"}
                                     </Button>
                                 </>
                             ) : (
                                 <>
                                     <p className="mt-4 font-notebook text-2xl font-bold text-graphite">Not started</p>
                                     <p className="mt-2 text-sm leading-6 text-graphite-soft">Begin with a prediction about where a plant&apos;s mass comes from.</p>
-                                    <Button asChild className="mt-5 bg-graphite text-paper-raised"><Link href="/learn/plant-mass">Start lesson</Link></Button>
+                                    <Button render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">Start lesson</Button>
                                 </>
                             )}
                         </article>
@@ -107,21 +107,21 @@ export function ProfileView() {
                     <section className="mt-8 border-t border-rule pt-8" aria-labelledby="local-data-title">
                         <h2 id="local-data-title" className="font-notebook text-2xl font-bold text-graphite">Local data controls</h2>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-graphite-soft">Clearing your local data removes this profile and the saved Photosynthesis lesson from this browser.</p>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button type="button" variant="outline" className="mt-5 border-coral/50 text-coral">Clear local data</Button>
-                            </DialogTrigger>
-                            <DialogContent className="border border-rule bg-paper-raised">
-                                <DialogHeader>
-                                    <DialogTitle className="font-notebook text-2xl font-bold text-graphite">Clear this learner&apos;s data?</DialogTitle>
-                                    <DialogDescription className="text-graphite-soft">This removes the profile and saved lesson progress from this browser. It cannot be undone.</DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                    <DialogClose asChild><Button variant="outline" className="border-rule-strong">Keep data</Button></DialogClose>
+                        <AlertDialog>
+                            <AlertDialogTrigger render={<Button type="button" variant="outline" className="mt-5 border-coral/50 text-coral" />}>
+                                Clear local data
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="border border-rule bg-paper-raised">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className="font-notebook text-2xl font-bold text-graphite">Clear this learner&apos;s data?</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-graphite-soft">This removes the profile and saved lesson progress from this browser. It cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogClose render={<Button variant="outline" className="border-rule-strong" />}>Keep data</AlertDialogClose>
                                     <Button type="button" onClick={clearLocalData} className="bg-coral text-white hover:bg-coral/85">Clear data</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </section>
                 </section>
             </div>

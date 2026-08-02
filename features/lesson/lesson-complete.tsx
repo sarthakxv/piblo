@@ -45,7 +45,7 @@ export function LessonComplete({
 
                     <div className="mt-10 flex flex-wrap gap-3">
                         <Button type="button" onClick={onTryAnotherApplication} className="bg-graphite px-5 text-paper-raised">Try another application</Button>
-                        <Button asChild variant="outline" className="border-rule-strong bg-paper-raised px-5 text-graphite"><Link href="/library">Browse more lessons</Link></Button>
+                        <Button render={<Link href="/library" />} variant="outline" className="border-rule-strong bg-paper-raised px-5 text-graphite">Browse more lessons</Button>
                     </div>
                 </section>
             </div>

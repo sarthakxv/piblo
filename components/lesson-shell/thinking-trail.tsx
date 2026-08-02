@@ -63,8 +63,8 @@ export function DesktopThinkingTrail({ phaseIndex, summaries }: { phaseIndex: nu
 export function MobileThinkingTrail({ phaseIndex, summaries }: { phaseIndex: number; summaries: Array<string | undefined> }) {
     return (
         <Sheet>
-            <SheetTrigger asChild>
-                <Button type="button" variant="outline" className="border-rule-strong bg-paper-raised lg:hidden">Thinking Trail</Button>
+            <SheetTrigger render={<Button type="button" variant="outline" className="border-rule-strong bg-paper-raised lg:hidden" />}>
+                Thinking Trail
             </SheetTrigger>
             <SheetContent className="border-rule bg-paper-raised p-6">
                 <SheetHeader className="p-0">
