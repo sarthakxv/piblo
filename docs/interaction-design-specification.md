@@ -5,10 +5,11 @@
 **Primary audience:** Learners in grades 6–10  
 **Related roadmap:** [Future Scope and Product Roadmap](./future-scope-todo.md)
 
-## Lo-fi implementation
+## Application implementation
 
-The confirmed interaction direction is implemented as a clickable React and
-Vite prototype in [`app/piblo-prototype.tsx`](../app/piblo-prototype.tsx).
+The confirmed interaction direction is implemented in the modular Next.js
+application under [`app/`](../app), [`components/`](../components), and
+[`features/`](../features).
 
 Run it with:
 
@@ -16,7 +17,7 @@ Run it with:
 npm run dev
 ```
 
-The prototype uses deterministic lesson data and covers:
+The learning workspace uses deterministic lesson moves and covers:
 
 - the complete Photosynthesis happy path;
 - a soil-mass misconception path;
@@ -27,9 +28,9 @@ The prototype uses deterministic lesson data and covers:
 - desktop and mobile layouts;
 - a final before-and-after reflection.
 
-It validates interaction structure and state transitions only. Connecting these
-moves to the live tutor, analyzer, persistence layer, and production activity
-schemas belongs to Phase 1.
+Local learner profiles and lesson sessions are persisted in the browser. The
+server-only tutor route exposes the live analyzer and tutor pipeline, but mapping
+its output into validated production activity schemas remains Phase 1 work.
 
 ## 1. Purpose
 

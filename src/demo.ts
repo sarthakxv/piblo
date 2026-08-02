@@ -3,11 +3,11 @@
 // and is walked toward understanding. Watch the learner-model panel move and
 // the misconception clear — that's the whole thesis of the product working.
 
-import { getAnalyzerModel, getTutorModel, modelLabel } from "./llm/index.ts";
-import type { ChatMessage } from "./llm/types.ts";
-import { PHOTOSYNTHESIS } from "./concept/photosynthesis.ts";
-import { emptyLearnerModel } from "./tutor/types.ts";
-import { analyzeTurn, applyAnalysis, tutorTurn } from "./tutor/loop.ts";
+import { getAnalyzerModel, getTutorModel, modelLabel } from "../server/llm/index.ts";
+import type { ChatMessage } from "../server/llm/types.ts";
+import { PHOTOSYNTHESIS } from "../content/concepts/photosynthesis.ts";
+import { emptyLearnerModel } from "../domain/learner-model/types.ts";
+import { analyzeTurn, applyAnalysis, tutorTurn } from "../domain/tutor/loop.ts";
 import { renderPanel } from "./ui.ts";
 
 // A deliberately imperfect student: wrong at first, then gradually gets it.

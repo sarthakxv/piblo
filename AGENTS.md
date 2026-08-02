@@ -2,15 +2,19 @@
 
 ## Project Structure & Module Organization
 
-This is a TypeScript prototype for a Socratic tutor and learner-model analyzer.
+This is a Next.js application for a Socratic tutor and learner-model analyzer.
 
-- `src/tutor/` contains the core loop, prompt construction, types, and unit tests.
-- `src/concept/photosynthesis.ts` defines the current lesson's objectives and misconceptions.
-- `src/llm/` isolates model-provider configuration from tutoring logic.
+- `app/` contains App Router pages, layouts, and server route handlers.
+- `components/ui/` contains shadcn primitives; product components live under `components/learning-moves/` and `components/lesson-shell/`.
+- `features/` contains complete learner-facing capabilities and local persistence adapters.
+- `domain/tutor/` contains the core loop, prompt construction, and unit tests.
+- `domain/learner-model/` contains learner-model and analyzer contracts.
+- `content/` contains topic and concept definitions.
+- `server/` isolates model-provider configuration and server-only orchestration from tutoring logic.
 - `src/harness.ts` and `src/demo.ts` are interactive and scripted CLI entry points.
 - `docs/` holds design, planning, and research notes. Keep implementation decisions close to the relevant document.
 
-Place new lesson content under `src/concept/`; keep provider-specific code inside `src/llm/` so the tutor loop remains vendor-neutral.
+Place new lesson content under `content/`; keep provider-specific code inside `server/llm/` so the tutor loop remains vendor-neutral. Add reusable primitives through shadcn rather than hand-rolling equivalents.
 
 ## Build, Test, and Development Commands
 
@@ -19,6 +23,8 @@ Use Node.js 22 or newer and run `npm install` before development.
 ```bash
 npm test          # run Node's built-in test suite
 npm run typecheck # run TypeScript checks without emitting files
+npm run build     # create the production Next.js build
+npm run dev       # start the application at http://localhost:3000
 npm run demo      # run the scripted tutoring demonstration
 npm run chat      # start the interactive CLI tutor
 ```
@@ -31,7 +37,7 @@ Write strict TypeScript using ES modules and explicit `.ts` import extensions. F
 
 ## Testing Guidelines
 
-Tests use `node:test` with `node:assert/strict`. Add colocated tests named `*.test.ts`, such as `src/tutor/loop.test.ts`. Cover normal transitions and boundary cases: mastery clamping, scaffold-rung changes, focus selection, and lesson completion. Run `npm test` and `npm run typecheck` before submitting changes. There is no configured coverage threshold; preserve and extend behavioral coverage for changed logic.
+Tests use `node:test` with `node:assert/strict`. Add colocated tests named `*.test.ts`, such as `domain/tutor/loop.test.ts`. Cover normal transitions and boundary cases: mastery clamping, scaffold-rung changes, focus selection, and lesson completion. Run `npm test`, `npm run typecheck`, and `npm run build` before submitting changes. There is no configured coverage threshold; preserve and extend behavioral coverage for changed logic.
 
 ## Commit & Pull Request Guidelines
 

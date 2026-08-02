@@ -11,8 +11,7 @@
     "types": [
       "node",
       "react",
-      "react-dom",
-      "vite/client"
+      "react-dom"
     ],
     "strict": true,
     "skipLibCheck": true,
@@ -20,17 +19,36 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": true
   },
   "include": [
     "app/**/*.ts",
     "app/**/*.tsx",
     "lib/**/*.ts",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "content/**/*.ts",
+    "domain/**/*.ts",
+    "features/**/*.ts",
+    "features/**/*.tsx",
+    "server/**/*.ts",
     "src/**/*.ts",
-    "vite.config.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

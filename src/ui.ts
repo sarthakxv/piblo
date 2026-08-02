@@ -1,5 +1,5 @@
-import type { Concept } from "./concept/photosynthesis.ts";
-import type { LearnerModel } from "./tutor/types.ts";
+import type { Concept } from "../content/concepts/photosynthesis.ts";
+import type { LearnerModel } from "../domain/learner-model/types.ts";
 
 // Renders the learner model as a compact panel so we can watch mastery move.
 // In the real app this data drives the mastery dashboard.

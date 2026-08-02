@@ -1,35 +1,40 @@
 {
-  "name": "piblo-prototype",
-  "version": "0.0.1",
+  "name": "piblo",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Piblo Socratic tutor + analyzer loop prototype (photosynthesis)",
+  "description": "Piblo adaptive learning application",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build && node scripts/package-worker.mjs",
-    "start": "vite preview",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "demo": "node --env-file-if-exists=.env --env-file-if-exists=../../../.env --experimental-strip-types src/demo.ts",
     "chat": "node --env-file-if-exists=.env --env-file-if-exists=../../../.env --experimental-strip-types src/harness.ts",
-    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "test": "node --test --experimental-strip-types 'domain/**/*.test.ts'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.5",
     "@tailwindcss/postcss": "^4.3.3",
     "ai": "^7.0.17",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lucide-react": "^1.28.0",
+    "next": "^16.2.12",
+    "radix-ui": "^1.6.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "server-only": "^0.0.1",
+    "shadcn": "^4.16.1",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
+    "tw-animate-css": "^1.4.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.4",
-    "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "typescript": "^6.0.3"
   }
 }
