@@ -3,13 +3,13 @@
 import { ChoiceGroup, FieldLabel, NotebookTextarea } from "./move-shared.tsx";
 import type { LearningMoveProps } from "./types.ts";
 
-export function ApplicationMove({ answers, updateAnswers }: LearningMoveProps) {
-    const options = [
-        "It keeps photosynthesizing normally",
-        "It cannot photosynthesize without light",
-        "It replaces light with nutrients from soil",
-    ];
+const APPLICATION_OPTIONS = [
+    "It keeps photosynthesizing normally",
+    "It cannot photosynthesize without light",
+    "It replaces light with nutrients from soil",
+];
 
+export function ApplicationMove({ answers, updateAnswers }: LearningMoveProps) {
     return (
         <>
             <p className="text-xs font-bold uppercase text-graphite-muted">Apply</p>
@@ -25,7 +25,7 @@ export function ApplicationMove({ answers, updateAnswers }: LearningMoveProps) {
                 <ChoiceGroup
                     value={answers.application}
                     idPrefix="application"
-                    choices={options.map((option) => ({ value: option, label: option }))}
+                    choices={APPLICATION_OPTIONS.map((option) => ({ value: option, label: option }))}
                     onValueChange={(application) => updateAnswers({ application })}
                     className="mt-3"
                 />

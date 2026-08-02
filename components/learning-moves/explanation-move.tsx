@@ -3,9 +3,9 @@
 import { ChoiceGroup, FieldLabel, NotebookTextarea } from "./move-shared.tsx";
 import type { LearningMoveProps } from "./types.ts";
 
-export function ExplanationMove({ answers, updateAnswers }: LearningMoveProps) {
-    const items = ["carbon dioxide", "water", "light"];
+const EXPLANATION_ITEMS = ["carbon dioxide", "water", "light"];
 
+export function ExplanationMove({ answers, updateAnswers }: LearningMoveProps) {
     return (
         <>
             <p className="text-xs font-bold uppercase text-graphite-muted">Explanation</p>
@@ -17,7 +17,7 @@ export function ExplanationMove({ answers, updateAnswers }: LearningMoveProps) {
             </p>
 
             <div className="mt-8 overflow-hidden rounded-lg border border-rule">
-                {items.map((item, index) => (
+                {EXPLANATION_ITEMS.map((item, index) => (
                     <div key={item} className={`grid gap-3 bg-paper px-4 py-4 sm:grid-cols-[1fr_auto] ${index > 0 ? "border-t border-rule" : ""}`}>
                         <p className="self-center font-semibold capitalize">{item}</p>
                         <ChoiceGroup

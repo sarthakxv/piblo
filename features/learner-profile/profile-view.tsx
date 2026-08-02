@@ -19,10 +19,10 @@ import { clearSession, readSession } from "@/features/session/session-storage.ts
 import type { Session } from "@/features/session/session-schema.ts";
 import { useLearnerProfile } from "./use-learner-profile.ts";
 
+const BIRTH_DATE_FORMAT = new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" });
+
 function formatBirthDate(dateOfBirth: string) {
-    return new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" }).format(
-        new Date(`${dateOfBirth}T00:00:00Z`),
-    );
+    return BIRTH_DATE_FORMAT.format(new Date(`${dateOfBirth}T00:00:00Z`));
 }
 
 export function ProfileView() {

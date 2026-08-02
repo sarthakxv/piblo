@@ -6,6 +6,13 @@ import type { LearningMoveProps } from "./types.ts";
 
 type GeneralizationField = [keyof LessonAnswers["generalization"], string];
 
+const GENERALIZATION_FIELDS: GeneralizationField[] = [
+    ["energy", "type of energy"],
+    ["firstInput", "first input"],
+    ["secondInput", "second input"],
+    ["output", "stored-energy output"],
+];
+
 function BlankInput({
     field,
     value,
@@ -32,13 +39,6 @@ function BlankInput({
 }
 
 export function GeneralizationMove({ answers, updateAnswers }: LearningMoveProps) {
-    const fields: GeneralizationField[] = [
-        ["energy", "type of energy"],
-        ["firstInput", "first input"],
-        ["secondInput", "second input"],
-        ["output", "stored-energy output"],
-    ];
-
     return (
         <>
             <p className="text-xs font-bold uppercase text-graphite-muted">Generalize</p>
@@ -53,25 +53,25 @@ export function GeneralizationMove({ answers, updateAnswers }: LearningMoveProps
                 <p className="font-notebook text-xl leading-10 sm:text-2xl">
                     Plants use
                     <BlankInput
-                        field={fields[0]}
+                        field={GENERALIZATION_FIELDS[0]}
                         value={answers.generalization.energy}
                         onChange={(energy) => updateAnswers({ generalization: { ...answers.generalization, energy } })}
                     />
                     energy to transform
                     <BlankInput
-                        field={fields[1]}
+                        field={GENERALIZATION_FIELDS[1]}
                         value={answers.generalization.firstInput}
                         onChange={(firstInput) => updateAnswers({ generalization: { ...answers.generalization, firstInput } })}
                     />
                     and
                     <BlankInput
-                        field={fields[2]}
+                        field={GENERALIZATION_FIELDS[2]}
                         value={answers.generalization.secondInput}
                         onChange={(secondInput) => updateAnswers({ generalization: { ...answers.generalization, secondInput } })}
                     />
                     into
                     <BlankInput
-                        field={fields[3]}
+                        field={GENERALIZATION_FIELDS[3]}
                         value={answers.generalization.output}
                         onChange={(output) => updateAnswers({ generalization: { ...answers.generalization, output } })}
                     />.

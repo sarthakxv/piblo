@@ -34,7 +34,7 @@ export const SessionSchema = z.object({
     phaseIndex: z.number().int().min(0).max(5),
     answers: LessonAnswersSchema,
     complete: z.boolean(),
-    updatedAt: z.string().datetime(),
+    updatedAt: z.iso.datetime(),
 });
 
 export type Session = z.infer<typeof SessionSchema>;

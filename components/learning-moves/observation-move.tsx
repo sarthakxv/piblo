@@ -3,13 +3,13 @@
 import { ChoiceGroup } from "./move-shared.tsx";
 import type { LearningMoveProps } from "./types.ts";
 
-export function ObservationMove({ answers, updateAnswers }: LearningMoveProps) {
-    const observations = [
-        ["The soil loss is too small", "Less than 1 kg cannot explain 50 kg of growth."],
-        ["The plant must be mostly water", "Water may matter, but the evidence does not show that yet."],
-        ["The numbers do not tell us anything", "There is no useful relationship here."],
-    ];
+const OBSERVATIONS = [
+    ["The soil loss is too small", "Less than 1 kg cannot explain 50 kg of growth."],
+    ["The plant must be mostly water", "Water may matter, but the evidence does not show that yet."],
+    ["The numbers do not tell us anything", "There is no useful relationship here."],
+];
 
+export function ObservationMove({ answers, updateAnswers }: LearningMoveProps) {
     return (
         <>
             <p className="text-xs font-bold uppercase text-graphite-muted">Observation</p>
@@ -36,7 +36,7 @@ export function ObservationMove({ answers, updateAnswers }: LearningMoveProps) {
                 <ChoiceGroup
                     value={answers.observation}
                     idPrefix="observation"
-                    choices={observations.map(([label, description]) => ({ value: label, label, description }))}
+                    choices={OBSERVATIONS.map(([label, description]) => ({ value: label, label, description }))}
                     onValueChange={(observation) => updateAnswers({ observation })}
                     className="mt-3"
                 />

@@ -5,10 +5,10 @@ import type { Confidence } from "@/domain/lesson/types.ts";
 import { ChoiceGroup, FieldLabel, NotebookTextarea } from "./move-shared.tsx";
 import type { LearningMoveProps } from "./types.ts";
 
-export function PredictionMove({ answers, updateAnswers }: LearningMoveProps) {
-    const options = ["Soil", "Water", "Air", "Sunlight", "Something else"];
-    const confidenceOptions: Confidence[] = ["Guessing", "Somewhat sure", "Sure"];
+const PREDICTION_OPTIONS = ["Soil", "Water", "Air", "Sunlight", "Something else"];
+const CONFIDENCE_OPTIONS: Confidence[] = ["Guessing", "Somewhat sure", "Sure"];
 
+export function PredictionMove({ answers, updateAnswers }: LearningMoveProps) {
     return (
         <>
             <p className="text-xs font-bold uppercase text-graphite-muted">Prediction</p>
@@ -24,7 +24,7 @@ export function PredictionMove({ answers, updateAnswers }: LearningMoveProps) {
                 <ChoiceGroup
                     value={answers.prediction}
                     idPrefix="prediction"
-                    choices={options.map((option) => ({ value: option, label: option }))}
+                    choices={PREDICTION_OPTIONS.map((option) => ({ value: option, label: option }))}
                     onValueChange={(prediction) => updateAnswers({ prediction })}
                     className="mt-3 sm:grid-cols-2"
                 />
@@ -57,7 +57,7 @@ export function PredictionMove({ answers, updateAnswers }: LearningMoveProps) {
                 <ChoiceGroup
                     value={answers.confidence}
                     idPrefix="confidence"
-                    choices={confidenceOptions.map((option) => ({ value: option, label: option }))}
+                    choices={CONFIDENCE_OPTIONS.map((option) => ({ value: option, label: option }))}
                     onValueChange={(confidence) => updateAnswers({ confidence: confidence as Confidence })}
                     className="mt-3 flex flex-wrap"
                     itemClassName="min-h-0 py-2"
