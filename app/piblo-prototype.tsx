@@ -4,6 +4,7 @@ import {
     useRef,
     useState,
     type FormEvent,
+    type KeyboardEvent,
     type ReactNode,
     type RefObject,
 } from "react";
@@ -727,9 +728,60 @@ function DateOfBirthField({
     dayRef: RefObject<HTMLInputElement | null>;
     onChange: (part: keyof DateOfBirthParts, value: string) => void;
 }) {
+    const monthRef = useRef<HTMLInputElement>(null);
+    const yearRef = useRef<HTMLInputElement>(null);
     const describedBy = error
         ? "learner-date-of-birth-hint learner-date-of-birth-error"
         : "learner-date-of-birth-hint";
+
+    const fieldRef = (part: keyof DateOfBirthParts) => {
+        if (part === "day") {
+            return dayRef;
+        }
+        if (part === "month") {
+            return monthRef;
+        }
+        return yearRef;
+    };
+
+    const handlePartChange = (part: keyof DateOfBirthParts, rawValue: string) => {
+        const maxLength = part === "year" ? 4 : 2;
+        const nextValue = rawValue.replace(/\D/g, "").slice(0, maxLength);
+        onChange(part, nextValue);
+
+        if (nextValue.length < maxLength) {
+            return;
+        }
+
+        if (part === "day") {
+            monthRef.current?.focus();
+            return;
+        }
+
+        if (part === "month") {
+            yearRef.current?.focus();
+        }
+    };
+
+    const handlePartKeyDown = (
+        part: keyof DateOfBirthParts,
+        event: KeyboardEvent<HTMLInputElement>,
+    ) => {
+        if (event.key !== "Backspace" || value[part].length > 0) {
+            return;
+        }
+
+        if (part === "year") {
+            event.preventDefault();
+            monthRef.current?.focus();
+            return;
+        }
+
+        if (part === "month") {
+            event.preventDefault();
+            dayRef.current?.focus();
+        }
+    };
 
     return (
         <fieldset className="mt-6">
@@ -739,10 +791,7 @@ function DateOfBirthField({
             <div
                 className={cn(
                     "flex min-h-12 items-center rounded-lg border bg-paper-inset px-3",
-                    "focus-within:ring-2 focus-within:ring-ink/20",
-                    error
-                        ? "border-coral focus-within:border-coral"
-                        : "border-rule focus-within:border-ink",
+                    error ? "border-coral" : "border-rule",
                 )}
             >
                 {DATE_OF_BIRTH_FIELDS.map((field, index) => (
@@ -756,7 +805,7 @@ function DateOfBirthField({
                             {field.label}
                         </label>
                         <input
-                            ref={field.part === "day" ? dayRef : undefined}
+                            ref={fieldRef(field.part)}
                             id={field.id}
                             name={field.name}
                             type="text"
@@ -767,11 +816,12 @@ function DateOfBirthField({
                             value={value[field.part]}
                             aria-invalid={Boolean(error)}
                             aria-describedby={describedBy}
-                            onChange={(event) => onChange(field.part, event.target.value)}
+                            onChange={(event) => handlePartChange(field.part, event.target.value)}
+                            onKeyDown={(event) => handlePartKeyDown(field.part, event)}
                             className={cn(
                                 field.width,
                                 "border-0 bg-transparent px-1 py-3 text-center text-base text-graphite",
-                                "placeholder:text-graphite-soft focus:outline-none",
+                                "placeholder:text-graphite-soft focus:outline-none focus-visible:outline-none",
                             )}
                             placeholder={field.placeholder}
                         />
@@ -949,10 +999,8 @@ function OnboardingView({
                                     }}
                                     className={cn(
                                         "min-h-12 w-full rounded-lg border bg-paper-inset px-4 py-3 text-base text-graphite",
-                                        "placeholder:text-graphite-soft focus:outline-none focus:ring-2 focus:ring-ink/20",
-                                        errors.name
-                                            ? "border-coral focus:border-coral"
-                                            : "border-rule focus:border-ink",
+                                        "placeholder:text-graphite-soft focus:outline-none focus-visible:outline-none",
+                                        errors.name ? "border-coral" : "border-rule",
                                     )}
                                     placeholder="What should Piblo call you?"
                                 />
