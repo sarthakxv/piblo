@@ -14,5 +14,5 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
     const lesson = findLesson(lessonId);
     if (!lesson?.available) notFound();
 
-    return <LessonWorkspace lessonId={lessonId} />;
+    return <LessonWorkspace key={lessonId} lessonId={lessonId} />;
 }

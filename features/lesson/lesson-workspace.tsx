@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MoveRenderer } from "@/components/learning-moves/move-renderer.tsx";
@@ -9,8 +9,12 @@ import { DesktopThinkingTrail } from "@/components/lesson-shell/thinking-trail.t
 import { HelpPanel } from "@/components/lesson-shell/help-panel.tsx";
 import { LessonHeader } from "@/components/lesson-shell/lesson-header.tsx";
 import { TurnStatusPanel, type TurnStatus } from "@/components/lesson-shell/turn-status.tsx";
-import { EMPTY_ANSWERS, PHASES, type LessonAnswers } from "@/domain/lesson/types.ts";
+import { PHASES, type LessonAnswers } from "@/domain/lesson/types.ts";
 import { buildTrailSummaries, canSubmitMove } from "@/domain/lesson/transitions.ts";
+import {
+    INITIAL_LESSON_WORKSPACE_STATE,
+    lessonWorkspaceReducer,
+} from "@/domain/lesson/workspace-state.ts";
 import { useLearnerProfile } from "@/features/learner-profile/use-learner-profile.ts";
 import { readSession, storeSession } from "@/features/session/session-storage.ts";
 import { LessonComplete } from "./lesson-complete.tsx";
@@ -22,17 +26,23 @@ const wait = (milliseconds: number) => new Promise<void>((resolve) => {
 export function LessonWorkspace({ lessonId }: { lessonId: string }) {
     const router = useRouter();
     const { profile, loaded: profileLoaded } = useLearnerProfile();
-    const [sessionLoaded, setSessionLoaded] = useState(false);
-    const [phaseIndex, setPhaseIndex] = useState(0);
-    const [answers, setAnswers] = useState<LessonAnswers>(EMPTY_ANSWERS);
-    const [complete, setComplete] = useState(false);
-    const [supportLevel, setSupportLevel] = useState(0);
+    const [workspace, dispatch] = useReducer(
+        lessonWorkspaceReducer,
+        INITIAL_LESSON_WORKSPACE_STATE,
+    );
     const [status, setStatus] = useState<TurnStatus>("idle");
-    const [askOpen, setAskOpen] = useState(false);
-    const [askQuestion, setAskQuestion] = useState("");
-    const [askAnswer, setAskAnswer] = useState("");
     const [failNextTurn, setFailNextTurn] = useState(false);
     const requestId = useRef(0);
+    const {
+        sessionLoaded,
+        phaseIndex,
+        answers,
+        complete,
+        supportLevel,
+        askOpen,
+        askQuestion,
+        askAnswer,
+    } = workspace;
 
     useEffect(() => {
         if (profileLoaded && !profile) router.replace("/");
@@ -40,12 +50,7 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
 
     useEffect(() => {
         const stored = readSession(lessonId);
-        if (stored) {
-            setPhaseIndex(stored.phaseIndex);
-            setAnswers(stored.answers);
-            setComplete(stored.complete);
-        }
-        setSessionLoaded(true);
+        dispatch({ type: "hydrate", progress: stored });
     }, [lessonId]);
 
     useEffect(() => {
@@ -61,7 +66,7 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
     }, [answers, complete, lessonId, phaseIndex, sessionLoaded]);
 
     const updateAnswers = useCallback((update: Partial<LessonAnswers>) => {
-        setAnswers((current) => ({ ...current, ...update }));
+        dispatch({ type: "update-answers", update });
     }, []);
 
     const busy = status === "assessing" || status === "preparing";
@@ -90,13 +95,9 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
 
         const nextPhaseIndex = phaseIndex + 1;
         if (nextPhaseIndex >= PHASES.length) {
-            setComplete(true);
+            dispatch({ type: "finish-lesson" });
         } else {
-            setPhaseIndex(nextPhaseIndex);
-            setSupportLevel(0);
-            setAskOpen(false);
-            setAskQuestion("");
-            setAskAnswer("");
+            dispatch({ type: "advance-phase" });
         }
         setStatus("idle");
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -110,7 +111,7 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
     if (!profileLoaded || !profile || !sessionLoaded) return <main className="min-h-dvh" aria-busy="true" />;
 
     if (complete) {
-        return <LessonComplete answers={answers} onTryAnotherApplication={() => { setComplete(false); setPhaseIndex(4); }} />;
+        return <LessonComplete answers={answers} onTryAnotherApplication={() => dispatch({ type: "retry-application" })} />;
     }
 
     return (
@@ -141,7 +142,7 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
                                         type="button"
                                         variant="outline"
                                         disabled={supportLevel >= 3}
-                                        onClick={() => setSupportLevel((current) => Math.min(current + 1, 3))}
+                                        onClick={() => dispatch({ type: "increase-support" })}
                                         className="border-amber-ink/35 bg-amber-note text-amber-ink"
                                     >
                                         Give me a hint
@@ -150,7 +151,7 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
                                         type="button"
                                         variant="outline"
                                         disabled={supportLevel >= 3}
-                                        onClick={() => setSupportLevel((current) => Math.min(current + 1, 3))}
+                                        onClick={() => dispatch({ type: "increase-support" })}
                                         className="border-rule-strong bg-paper-raised"
                                     >
                                         I&apos;m stuck
@@ -159,17 +160,14 @@ export function LessonWorkspace({ lessonId }: { lessonId: string }) {
                                         open={askOpen}
                                         question={askQuestion}
                                         answer={askAnswer}
-                                        onOpenChange={(open) => {
-                                            setAskOpen(open);
-                                            if (!open) {
-                                                setAskQuestion("");
-                                                setAskAnswer("");
-                                            }
-                                        }}
-                                        onQuestionChange={setAskQuestion}
+                                        onOpenChange={(open) => dispatch({ type: "set-ask-open", open })}
+                                        onQuestionChange={(question) => dispatch({ type: "set-ask-question", question })}
                                         onSubmit={() => {
                                             if (!askQuestion.trim()) return;
-                                            setAskAnswer("Light is energy rather than plant material. It powers the rearrangement of carbon dioxide and water into glucose—like electricity powers a machine without becoming the product.");
+                                            dispatch({
+                                                type: "set-ask-answer",
+                                                answer: "Light is energy rather than plant material. It powers the rearrangement of carbon dioxide and water into glucose—like electricity powers a machine without becoming the product.",
+                                            });
                                         }}
                                     />
                                 </div>
