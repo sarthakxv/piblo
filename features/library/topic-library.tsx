@@ -17,7 +17,6 @@ export function TopicLibrary({ initialProfile }: TopicLibraryProps = {}) {
     const router = useRouter();
     const { profile: storedProfile, loaded, storageWarning } = useLearnerProfile();
     const [selectedTopicId, setSelectedTopicId] = useState(TOPICS[0].id);
-    const [expandedLevelId, setExpandedLevelId] = useState<string | null>(null);
     const profile = storedProfile ?? initialProfile ?? null;
     const profileLoaded = loaded || Boolean(initialProfile);
 
@@ -50,8 +49,8 @@ export function TopicLibrary({ initialProfile }: TopicLibraryProps = {}) {
                     {storageWarning ? <div role="status" className="mb-4 rounded-lg border border-amber-ink/25 bg-amber-note px-4 py-3 text-sm leading-6 text-graphite">You can continue, but this browser won&apos;t remember your details.</div> : null}
 
                     <div className="overflow-hidden rounded-xl border border-rule bg-paper-raised lg:grid lg:min-h-[36rem] lg:grid-cols-[20rem_minmax(0,1fr)]">
-                        <TopicPicker selectedTopic={selectedTopic} onSelectTopic={(topicId) => { setSelectedTopicId(topicId); setExpandedLevelId(null); }} />
-                        <LearningPath topic={selectedTopic} expandedLevelId={expandedLevelId} onToggleLevel={(levelId) => setExpandedLevelId((current) => current === levelId ? null : levelId)} />
+                        <TopicPicker selectedTopic={selectedTopic} onSelectTopic={setSelectedTopicId} />
+                        <LearningPath topic={selectedTopic} />
                     </div>
                 </section>
             </div>

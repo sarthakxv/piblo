@@ -24,9 +24,15 @@ export interface LearnerModel {
   turnsOnObjective: number;
   /** True once every objective's mastery is at or above MASTERY_THRESHOLD. */
   lessonComplete: boolean;
+  /** Controls how much context the tutor supplies before its next question. */
+  explanationDepth: ExplanationDepth;
 }
 
-export function emptyLearnerModel(): LearnerModel {
+export type ExplanationDepth = "foundational" | "guided" | "concise";
+
+export function emptyLearnerModel(
+  initial: Partial<LearnerModel> = {},
+): LearnerModel {
   return {
     masteryByObjective: {},
     activeMisconceptions: [],
@@ -38,6 +44,8 @@ export function emptyLearnerModel(): LearnerModel {
     answerRevealed: [],
     turnsOnObjective: 0,
     lessonComplete: false,
+    explanationDepth: "guided",
+    ...initial,
   };
 }
 

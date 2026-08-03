@@ -27,26 +27,3 @@ export function canSubmitMove(phaseIndex: number, answers: LessonAnswers): boole
             return false;
     }
 }
-
-export function buildTrailSummaries(answers: LessonAnswers): Array<string | undefined> {
-    return [
-        answers.prediction
-            ? `You chose ${answers.prediction === "Something else" ? answers.predictionOther : answers.prediction.toLowerCase()}.`
-            : undefined,
-        answers.observation
-            ? answers.observation === "The soil loss is too small"
-                ? "The soil loss was too small to explain the plant's growth."
-                : "You captured an observation to test against the evidence."
-            : undefined,
-        answers.explanation.trim()
-            ? "You connected matter from air and water with energy from light."
-            : undefined,
-        answers.generalization.output.trim()
-            ? `Your rule produces ${answers.generalization.output}.`
-            : undefined,
-        answers.application
-            ? "You tested the rule on a plant kept in darkness."
-            : undefined,
-        answers.reflection.trim() ? "You explained how your thinking changed." : undefined,
-    ];
-}

@@ -14,9 +14,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { PHASES } from "@/domain/lesson/types.ts";
-import { clearSession, readSession } from "@/features/session/session-storage.ts";
-import type { Session } from "@/features/session/session-schema.ts";
+import { PHOTOSYNTHESIS } from "@/content/concepts/photosynthesis.ts";
+import { MASTERY_THRESHOLD } from "@/domain/learner-model/types.ts";
+import { clearAllTopicSessions, readTopicSession } from "@/features/session/session-storage.ts";
+import type { TopicSession } from "@/features/session/session-schema.ts";
 import { useLearnerProfile } from "./use-learner-profile.ts";
 
 const BIRTH_DATE_FORMAT = new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" });
@@ -28,25 +29,36 @@ function formatBirthDate(dateOfBirth: string) {
 export function ProfileView() {
     const router = useRouter();
     const { profile, loaded, resetProfile } = useLearnerProfile();
-    const [session, setSession] = useState<Session | null>(null);
+    const [session, setSession] = useState<TopicSession | null>(null);
 
     useEffect(() => {
         if (loaded && !profile) {
             router.replace("/");
             return;
         }
-        if (loaded) setSession(readSession("plant-mass"));
+        if (loaded) setSession(readTopicSession("photosynthesis", "recommended"));
     }, [loaded, profile, router]);
 
     if (!loaded || !profile) return <main className="min-h-dvh" aria-busy="true" />;
 
-    const phase = session ? PHASES[session.phaseIndex] : null;
-    const completedArtifacts = session
-        ? session.complete ? PHASES.length : session.phaseIndex
+    const completedMilestones = session?.learnerModel
+        ? PHOTOSYNTHESIS.objectives.filter(
+            (objective) => (
+                session.learnerModel?.masteryByObjective[objective.id] ?? 0
+            ) >= MASTERY_THRESHOLD,
+        ).length
         : 0;
+    const stageLabel = {
+        overview: "Ready to begin",
+        diagnostic: "Getting to know your starting point",
+        analyzing: "Analyzing your starting point",
+        chat: "Learning with Piblo",
+        reflection: "Reflecting on your understanding",
+        complete: "Topic complete",
+    }[session?.stage ?? "overview"];
 
     const clearLocalData = () => {
-        clearSession("plant-mass");
+        clearAllTopicSessions();
         resetProfile();
         router.replace("/");
     };
@@ -88,17 +100,17 @@ export function ProfileView() {
                             <p className="text-xs font-bold uppercase tracking-wide text-graphite-muted">Photosynthesis</p>
                             {session ? (
                                 <>
-                                    <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{session.complete ? "Lesson complete" : phase?.learnerLabel}</p>
-                                    <p className="mt-2 text-sm leading-6 text-graphite-soft">{completedArtifacts} of {PHASES.length} Thinking Trail artifacts completed.</p>
-                                    <Button nativeButton={false} render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">
-                                        {session.complete ? "Review lesson" : "Resume lesson"}
+                                    <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{stageLabel}</p>
+                                    <p className="mt-2 text-sm leading-6 text-graphite-soft">{completedMilestones} of {PHOTOSYNTHESIS.objectives.length} understanding milestones completed.</p>
+                                    <Button nativeButton={false} render={<Link href="/learn/photosynthesis/recommended" />} className="mt-5 bg-graphite text-paper-raised">
+                                        {session.stage === "complete" ? "Review topic" : "Resume topic"}
                                     </Button>
                                 </>
                             ) : (
                                 <>
                                     <p className="mt-4 font-notebook text-2xl font-bold text-graphite">Not started</p>
-                                    <p className="mt-2 text-sm leading-6 text-graphite-soft">Begin with a prediction about where a plant&apos;s mass comes from.</p>
-                                    <Button nativeButton={false} render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">Start lesson</Button>
+                                    <p className="mt-2 text-sm leading-6 text-graphite-soft">See the five milestones, then show Piblo what you already understand.</p>
+                                    <Button nativeButton={false} render={<Link href="/learn/photosynthesis/recommended" />} className="mt-5 bg-graphite text-paper-raised">Start topic</Button>
                                 </>
                             )}
                         </article>
@@ -106,7 +118,7 @@ export function ProfileView() {
 
                     <section className="mt-8 border-t border-rule pt-8" aria-labelledby="local-data-title">
                         <h2 id="local-data-title" className="font-notebook text-2xl font-bold text-graphite">Local data controls</h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-graphite-soft">Clearing your local data removes this profile and the saved Photosynthesis lesson from this browser.</p>
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-graphite-soft">Clearing your local data removes this profile and all saved topic progress from this browser.</p>
                         <AlertDialog>
                             <AlertDialogTrigger render={<Button type="button" variant="outline" className="mt-5 border-coral/50 text-coral" />}>
                                 Clear local data
@@ -114,7 +126,7 @@ export function ProfileView() {
                             <AlertDialogContent className="border border-rule bg-paper-raised">
                                 <AlertDialogHeader>
                                     <AlertDialogTitle className="font-notebook text-2xl font-bold text-graphite">Clear this learner&apos;s data?</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-graphite-soft">This removes the profile and saved lesson progress from this browser. It cannot be undone.</AlertDialogDescription>
+                                    <AlertDialogDescription className="text-graphite-soft">This removes the profile and all saved topic progress from this browser. It cannot be undone.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogClose render={<Button variant="outline" className="border-rule-strong" />}>Keep data</AlertDialogClose>

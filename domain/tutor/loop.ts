@@ -1,6 +1,6 @@
 import { generateText, Output, type LanguageModel } from "ai";
 import type { ChatMessage } from "../../server/llm/types.ts";
-import type { Concept } from "../../content/concepts/photosynthesis.ts";
+import type { Concept } from "../../content/concepts/types.ts";
 import {
   AnalyzerSchema, type AnalyzerResult, type LearnerModel,
   RUNG_ANSWER, MASTERY_THRESHOLD, CONFIDENCE_FLOOR,
@@ -100,13 +100,19 @@ export function applyAnalysis(
   }
 
   // Mastery + misconceptions + confidence — independent of the ladder.
+  const objectiveIds = new Set(concept.objectives.map((objective) => objective.id));
+  const misconceptionIds = new Set(
+    concept.misconceptions.map((misconception) => misconception.id),
+  );
   const mastery = { ...model.masteryByObjective };
   for (const [id, delta] of Object.entries(result.masteryDeltas)) {
-    if (typeof delta !== "number") continue;
+    if (!objectiveIds.has(id) || typeof delta !== "number") continue;
     mastery[id] = clamp((mastery[id] ?? 0) + delta);
   }
   const active = new Set(model.activeMisconceptions);
-  for (const id of result.detectedMisconceptions) active.add(id);
+  for (const id of result.detectedMisconceptions) {
+    if (misconceptionIds.has(id)) active.add(id);
+  }
   for (const id of result.resolvedMisconceptions) active.delete(id);
   const confidence = clamp(result.confidence);
 
@@ -182,5 +188,6 @@ export function applyAnalysis(
     answerRevealed: revealed,
     turnsOnObjective,
     lessonComplete,
+    explanationDepth: model.explanationDepth,
   };
 }

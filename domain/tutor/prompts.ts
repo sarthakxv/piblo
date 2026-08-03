@@ -1,4 +1,5 @@
-import type { Concept } from "../../content/concepts/photosynthesis.ts";
+import type { Concept } from "../../content/concepts/types.ts";
+import type { LessonAnswers } from "../lesson/types.ts";
 import { RUNG_ANSWER, type LearnerModel } from "../learner-model/types.ts";
 
 // ── Tutor system prompt ──────────────────────────────────────────────────────
@@ -37,13 +38,19 @@ export function buildTutorSystem(concept: Concept, model: LearnerModel): string 
 At L${RUNG_ANSWER} (L3) this OVERRIDES the no-direct-answer rule — the ladder ends in the answer by design.`
     : `LADDER STATE: The lesson is just starting — no scaffold rung yet. Open with a PREDICTION the learner commits to (see LESSON ARC).`;
 
+  const depthGuidance = {
+    foundational: "Give a little more context before each question: up to 4 short sentences, one concrete example at a time, and avoid assuming vocabulary.",
+    guided: "Use 2–3 short sentences with one useful hint before the question.",
+    concise: "Be concise: use 1–2 short sentences and move quickly to transfer or edge-case questions.",
+  }[model.explanationDepth];
+
   return `You are Piblo, a Socratic learning companion helping a secondary-school student (grades 6–10) truly understand ONE concept: ${concept.title}.
 
 Your north star: UNDERSTANDING, not answers. The learner must think before you explain.
 
 HARD RULES — never break these:
 - Do NOT give a direct, complete answer or textbook definition — UNLESS you are at ladder level ${RUNG_ANSWER} (L3), where you state it plainly then ask a reflection question. Otherwise lead the student to build it themselves.
-- One idea at a time. Keep every reply to 1–3 short sentences and end with exactly ONE question — unless the lesson is complete (see below), in which case close warmly with no new question.
+- One idea at a time. ${depthGuidance} End with exactly ONE question — unless the lesson is complete (see below), in which case close warmly with no new question.
 - Start from what the student already believes. Build on it; don't lecture over it.
 - When you spot a misconception, do NOT flatly correct it (unless at L3). Ask a question or offer one small observation that lets the student notice the conflict themselves.
 - Reward curiosity: if the student wonders "why", follow it.
@@ -68,6 +75,8 @@ Active misconceptions to gently surface (never lecture):
 ${active}
 
 Estimated confidence: ${Math.round(model.confidence * 100)}%
+
+Explanation depth: ${model.explanationDepth}
 
 Guidance: probe objectives marked "unknown" or low. Don't re-teach objectives already high. If confidence is high but mastery is low, gently test it with a "what if" question. If confidence is low but the student is right, affirm and stretch them.`;
 }
@@ -123,4 +132,30 @@ Rules:
 - masteryDeltas: include only objectives the message gives real evidence about. Keep deltas SMALL (±0.05..±0.15); a wrong guess must not zero an objective already partly shown.
 - confidence: estimate from tone/hedging ("I think maybe" = low, "obviously" = high).
 - reasoning: one short sentence, always in English.`;
+}
+
+export function buildDiagnosticSystem(concept: Concept, answers: LessonAnswers): string {
+  const objectives = concept.objectives
+    .map((objective) => `  - ${objective.id} (${objective.title}): ${objective.masteryCriterion}`)
+    .join("\n");
+  const misconceptions = concept.misconceptions
+    .map((misconception) => `  - ${misconception.id}: ${misconception.belief}`)
+    .join("\n");
+
+  return `You are Piblo's placement analyzer for ${concept.title}. Evaluate a structured diagnostic before tutoring begins.
+
+Milestone rubrics:
+${objectives}
+
+Known misconceptions:
+${misconceptions}
+
+Return one JSON object matching the supplied schema. Use an absolute mastery estimate from 0 to 1 only when the learner's own answer provides evidence. Keep unknown or untested milestones low. Do not reward vocabulary supplied by the question itself. Detect a misconception only when the learner positively expresses it.
+
+Use these exact JSON keys: masteryByObjective, detectedMisconceptions, confidence, learnerSummary, and reasoning. masteryByObjective maps milestone ids to numbers. detectedMisconceptions is an array of misconception ids. Do not rename either field.
+
+Write learnerSummary directly to the learner in 2–3 warm sentences. Mention what they already understand, what still needs work, and where Piblo will begin. Never show percentages, scores, or internal ids.
+
+Diagnostic answers:
+${JSON.stringify(answers, null, 2)}`;
 }

@@ -1,68 +1,45 @@
-// The concept graph for Photosynthesis, sized for grades 6–10.
-// Mastery is tracked per-objective; the analyzer scores the student's answers
-// against these, and the tutor probes whichever objectives are still weak.
+import type { Concept } from "./types.ts";
 
-export interface Objective {
-  id: string;
-  title: string;
-  /** What "mastered" looks like — the analyzer's rubric, not shown verbatim. */
-  masteryCriterion: string;
-}
-
-export interface Misconception {
-  id: string;
-  belief: string;
-  reality: string;
-}
-
-export interface Concept {
-  id: string;
-  title: string;
-  objectives: Objective[];
-  misconceptions: Misconception[];
-  /** Language the tutor must reply in. Defaults to English when omitted. */
-  targetLanguage?: string;
-}
+export type { Concept, Misconception, Objective } from "./types.ts";
 
 export const PHOTOSYNTHESIS: Concept = {
   id: "photosynthesis",
   title: "Photosynthesis",
   objectives: [
     {
-      id: "purpose",
-      title: "Plants make their own food",
+      id: "gases",
+      title: "Discovering gases",
+      shortTitle: "Gases",
       masteryCriterion:
-        "Understands a plant produces its own food/energy rather than absorbing ready-made food.",
+        "Explains that plants take in carbon dioxide from the air and release oxygen, and connects carbon dioxide to the material used to build glucose.",
     },
     {
-      id: "inputs",
-      title: "Inputs: carbon dioxide, water, light",
+      id: "water-role",
+      title: "Finding water's role",
+      shortTitle: "Water's role",
       masteryCriterion:
-        "Names carbon dioxide (from air), water (from roots), and light as the required inputs.",
+        "Explains that roots absorb water and that water supplies matter used in photosynthesis rather than being ready-made food.",
     },
     {
-      id: "outputs",
-      title: "Outputs: glucose and oxygen",
+      id: "sunlight-job",
+      title: "Identifying sunlight's job",
+      shortTitle: "Sunlight's job",
       masteryCriterion:
-        "Knows the process produces glucose (stored energy) and releases oxygen.",
+        "Distinguishes light as the energy source that powers the reaction from the matter that becomes glucose.",
     },
     {
-      id: "location",
-      title: "Where it happens",
+      id: "balanced-equation",
+      title: "Balancing the photosynthesis equation",
+      shortTitle: "The equation",
       masteryCriterion:
-        "Locates it in leaves/chloroplasts and links chlorophyll to capturing light.",
+        "Builds and balances 6CO2 + 6H2O -> C6H12O6 + 6O2 and explains that atoms are rearranged rather than created.",
     },
     {
-      id: "transformation",
-      title: "Light energy becomes chemical energy",
+      id: "final-understanding",
+      title: "Building a complete understanding",
+      shortTitle: "Final understanding",
       masteryCriterion:
-        "Explains that light energy is converted into chemical energy stored in glucose.",
-    },
-    {
-      id: "significance",
-      title: "Why it matters",
-      masteryCriterion:
-        "Connects photosynthesis to food chains and to the oxygen animals breathe.",
+        "Combines inputs, outputs, energy transfer, location in chloroplasts, and significance to food chains into a coherent explanation that transfers to a new situation.",
     },
   ],
   misconceptions: [
@@ -79,6 +56,12 @@ export const PHOTOSYNTHESIS: Concept = {
         "Most of a plant's dry mass comes from carbon captured out of CO2 in the air.",
     },
     {
+      id: "water_is_food",
+      belief: "Water is the plant's food or becomes plant material by itself.",
+      reality:
+        "Water contributes matter to photosynthesis, but plants make glucose by rearranging water and carbon dioxide using light energy.",
+    },
+    {
       id: "night_respiration",
       belief: "Plants only respire at night / do not respire.",
       reality:
@@ -88,6 +71,18 @@ export const PHOTOSYNTHESIS: Concept = {
       id: "light_optional",
       belief: "Plants just need water and soil, not light, to make food.",
       reality: "Light is an essential energy source for photosynthesis.",
+    },
+    {
+      id: "light_is_matter",
+      belief: "Sunlight becomes the physical material of the plant.",
+      reality:
+        "Light supplies energy; carbon dioxide and water supply the atoms that are rearranged into glucose.",
+    },
+    {
+      id: "atoms_created",
+      belief: "Balancing an equation changes or creates atoms to make the formula work.",
+      reality:
+        "Balancing records equal numbers of each atom before and after the reaction; atoms are rearranged, not created.",
     },
     {
       id: "photo_eq_resp",

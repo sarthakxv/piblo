@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildTrailSummaries, canSubmitMove } from "./transitions.ts";
+import { canSubmitMove } from "./transitions.ts";
 import { EMPTY_ANSWERS, type LessonAnswers } from "./types.ts";
 
 const answersWith = (update: Partial<LessonAnswers>): LessonAnswers => ({
@@ -44,12 +44,4 @@ test("explanation requires every relationship and written reasoning", () => {
         }),
         true,
     );
-});
-
-test("trail summaries retain the learner's prediction", () => {
-    const summaries = buildTrailSummaries(
-        answersWith({ prediction: "Something else", predictionOther: "Minerals" }),
-    );
-    assert.equal(summaries[0], "You chose Minerals.");
-    assert.equal(summaries[1], undefined);
 });

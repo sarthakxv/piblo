@@ -1,25 +1,37 @@
+import { z } from "zod";
+
 export type Confidence = "Guessing" | "Somewhat sure" | "Sure";
 export type RelationshipAnswer = "part" | "not-part";
 
-export interface LessonAnswers {
-    prediction: string;
-    predictionOther: string;
-    predictionReason: string;
-    confidence: Confidence | "";
-    observation: string;
-    explanation: string;
-    relationships: Record<string, RelationshipAnswer | undefined>;
-    generalization: {
-        energy: string;
-        firstInput: string;
-        secondInput: string;
-        output: string;
-    };
-    application: string;
-    applicationReason: string;
-    reflection: string;
-    reflectionEvidence: string;
-}
+export const LessonAnswersSchema = z.object({
+    prediction: z.string(),
+    predictionOther: z.string(),
+    predictionReason: z.string(),
+    confidence: z.union([
+        z.literal(""),
+        z.literal("Guessing"),
+        z.literal("Somewhat sure"),
+        z.literal("Sure"),
+    ]),
+    observation: z.string(),
+    explanation: z.string(),
+    relationships: z.record(
+        z.string(),
+        z.union([z.literal("part"), z.literal("not-part")]).optional(),
+    ),
+    generalization: z.object({
+        energy: z.string(),
+        firstInput: z.string(),
+        secondInput: z.string(),
+        output: z.string(),
+    }),
+    application: z.string(),
+    applicationReason: z.string(),
+    reflection: z.string(),
+    reflectionEvidence: z.string(),
+});
+
+export type LessonAnswers = z.infer<typeof LessonAnswersSchema>;
 
 export interface PhaseDefinition {
     key: string;
@@ -66,6 +78,8 @@ export const PHASES: PhaseDefinition[] = [
         eyebrow: "Notice how your thinking changed",
     },
 ];
+
+export const DIAGNOSTIC_PHASES = PHASES.slice(0, 5);
 
 export const EMPTY_ANSWERS: LessonAnswers = {
     prediction: "",
