@@ -196,6 +196,16 @@ select:focus-visible {
     * {
         @apply border-border outline-ring/50;
     }
+    :any-link,
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]),
+    [role="option"]:not([aria-disabled="true"]),
+    summary,
+    label[for],
+    select:not(:disabled),
+    input:is([type="button"], [type="checkbox"], [type="file"], [type="radio"], [type="reset"], [type="submit"]):not(:disabled) {
+        cursor: pointer;
+    }
     body {
         @apply bg-background text-foreground;
     }

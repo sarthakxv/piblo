@@ -62,7 +62,7 @@ export function TopicPicker({
                                             key={topic.id}
                                             value={topic}
                                             className={({ highlighted, selected }) => cn(
-                                                "cursor-default rounded-md px-3 py-3 text-left text-graphite-soft outline-none select-none",
+                                                "cursor-pointer rounded-md px-3 py-3 text-left text-graphite-soft outline-none select-none",
                                                 selected
                                                     ? "bg-ink-soft text-graphite"
                                                     : highlighted
