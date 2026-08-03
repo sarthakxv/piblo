@@ -59,7 +59,7 @@ export function ProfileView() {
                         <Link href="/library" className="font-notebook text-2xl font-bold text-graphite">Piblo</Link>
                         <p className="text-xs text-graphite-muted">Learner profile</p>
                     </div>
-                    <Button render={<Link href="/library" />} variant="outline" className="border-rule-strong bg-paper-raised">
+                    <Button nativeButton={false} render={<Link href="/library" />} variant="outline" className="border-rule-strong bg-paper-raised">
                         Back to library
                     </Button>
                 </header>
@@ -90,7 +90,7 @@ export function ProfileView() {
                                 <>
                                     <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{session.complete ? "Lesson complete" : phase?.learnerLabel}</p>
                                     <p className="mt-2 text-sm leading-6 text-graphite-soft">{completedArtifacts} of {PHASES.length} Thinking Trail artifacts completed.</p>
-                                    <Button render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">
+                                    <Button nativeButton={false} render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">
                                         {session.complete ? "Review lesson" : "Resume lesson"}
                                     </Button>
                                 </>
@@ -98,7 +98,7 @@ export function ProfileView() {
                                 <>
                                     <p className="mt-4 font-notebook text-2xl font-bold text-graphite">Not started</p>
                                     <p className="mt-2 text-sm leading-6 text-graphite-soft">Begin with a prediction about where a plant&apos;s mass comes from.</p>
-                                    <Button render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">Start lesson</Button>
+                                    <Button nativeButton={false} render={<Link href="/learn/plant-mass" />} className="mt-5 bg-graphite text-paper-raised">Start lesson</Button>
                                 </>
                             )}
                         </article>

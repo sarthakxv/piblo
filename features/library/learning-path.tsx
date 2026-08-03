@@ -55,7 +55,7 @@ export function LearningPath({
                                         {level.lessons.map((lesson, lessonIndex) => (
                                             <li key={lesson.id}>
                                                 {lesson.available ? (
-                                                    <Button render={<Link href={`/learn/${lesson.id}`} />} variant="outline" className="h-auto w-full justify-start whitespace-normal border-ink/35 bg-ink-soft px-4 py-3 text-left hover:border-ink hover:bg-ink-soft">
+                                                    <Button nativeButton={false} render={<Link href={`/learn/${lesson.id}`} />} variant="outline" className="h-auto w-full justify-start whitespace-normal border-ink/35 bg-ink-soft px-4 py-3 text-left hover:border-ink hover:bg-ink-soft">
                                                             <span className="pt-0.5 font-notebook text-sm font-bold tabular-nums text-graphite-soft">{index + 1}.{lessonIndex + 1}</span>
                                                             <span className="min-w-0 flex-1">
                                                                 <span className="flex flex-wrap items-center justify-between gap-2">
