@@ -7,6 +7,7 @@ export interface MilestoneState {
     id: string;
     title: string;
     shortTitle: string;
+    takeaway: string;
     status: MilestoneStatus;
 }
 
@@ -32,6 +33,7 @@ export function deriveMilestoneStates(
             id: objective.id,
             title: objective.title,
             shortTitle: objective.shortTitle,
+            takeaway: objective.takeaway,
             status,
         };
     });

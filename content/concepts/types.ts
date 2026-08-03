@@ -2,7 +2,14 @@ export interface Objective {
     id: string;
     title: string;
     shortTitle: string;
+    takeaway: string;
     masteryCriterion: string;
+}
+
+export interface ReviewCard {
+    id: string;
+    question: string;
+    answer: string;
 }
 
 export interface Misconception {
@@ -16,5 +23,6 @@ export interface Concept {
     title: string;
     objectives: Objective[];
     misconceptions: Misconception[];
+    reviewCards: ReviewCard[];
     targetLanguage?: string;
 }

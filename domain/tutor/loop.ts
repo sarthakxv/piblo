@@ -62,8 +62,7 @@ export async function analyzeTurn(
 }
 
 // Choose the next objective to work: lowest mastery below threshold, preferring
-// one not already answer-revealed (so a freshly told objective isn't immediately
-// re-probed — a lightweight retrieval re-check). Null when all are mastered.
+// one not already answer-revealed. Null when all are mastered.
 export function pickNextFocus(
   mastery: Record<string, number>,
   concept: Concept,
@@ -130,9 +129,13 @@ export function applyAnalysis(
   }
 
   if (rung === RUNG_ANSWER) {
-    // The tutor delivered the answer last turn. Record it (do NOT auto-bump
-    // mastery), advance to a fresh episode on the next objective.
-    if (focus && !revealed.includes(focus)) revealed = [...revealed, focus];
+    // The tutor delivered the answer and the learner engaged with its follow-up.
+    // Record the support that was needed and complete this milestone before
+    // moving the visible understanding trail forward.
+    if (focus) {
+      mastery[focus] = Math.max(mastery[focus] ?? 0, MASTERY_THRESHOLD);
+      if (!revealed.includes(focus)) revealed = [...revealed, focus];
+    }
     focus = pickNextFocus(mastery, concept, revealed);
     rung = struggleStartRung(revealed);
     stuck = 0;
@@ -152,6 +155,12 @@ export function applyAnalysis(
         rung = Math.max(rung - 1, 0); // decay, not reset
         stuck = 0;
       } else if (result.scaffoldSignal === "solved") {
+        // "Solved" means the analyzer judged the milestone's mastery criterion
+        // complete. Keep that semantic aligned with the checkmark threshold even
+        // when the model supplied a conservative numeric delta.
+        if (focus) {
+          mastery[focus] = Math.max(mastery[focus] ?? 0, MASTERY_THRESHOLD);
+        }
         focus = pickNextFocus(mastery, concept, revealed);
         rung = struggleStartRung(revealed);
         stuck = 0;

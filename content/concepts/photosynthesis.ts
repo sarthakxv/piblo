@@ -10,6 +10,7 @@ export const PHOTOSYNTHESIS: Concept = {
       id: "gases",
       title: "Discovering gases",
       shortTitle: "Gases",
+      takeaway: "Carbon dioxide supplies the carbon plants use to build glucose, while oxygen is released.",
       masteryCriterion:
         "Explains that plants take in carbon dioxide from the air and release oxygen, and connects carbon dioxide to the material used to build glucose.",
     },
@@ -17,6 +18,7 @@ export const PHOTOSYNTHESIS: Concept = {
       id: "water-role",
       title: "Finding water's role",
       shortTitle: "Water's role",
+      takeaway: "Roots absorb water, which contributes matter to photosynthesis rather than ready-made food.",
       masteryCriterion:
         "Explains that roots absorb water and that water supplies matter used in photosynthesis rather than being ready-made food.",
     },
@@ -24,6 +26,7 @@ export const PHOTOSYNTHESIS: Concept = {
       id: "sunlight-job",
       title: "Identifying sunlight's job",
       shortTitle: "Sunlight's job",
+      takeaway: "Sunlight supplies the energy for the reaction; it does not become plant matter.",
       masteryCriterion:
         "Distinguishes light as the energy source that powers the reaction from the matter that becomes glucose.",
     },
@@ -31,6 +34,7 @@ export const PHOTOSYNTHESIS: Concept = {
       id: "balanced-equation",
       title: "Balancing the photosynthesis equation",
       shortTitle: "The equation",
+      takeaway: "The balanced equation shows atoms being rearranged into glucose and oxygen, never created.",
       masteryCriterion:
         "Builds and balances 6CO2 + 6H2O -> C6H12O6 + 6O2 and explains that atoms are rearranged rather than created.",
     },
@@ -38,8 +42,31 @@ export const PHOTOSYNTHESIS: Concept = {
       id: "final-understanding",
       title: "Building a complete understanding",
       shortTitle: "Final understanding",
+      takeaway: "Inputs, energy, chloroplasts, and outputs connect plants to nearly every food chain.",
       masteryCriterion:
         "Combines inputs, outputs, energy transfer, location in chloroplasts, and significance to food chains into a coherent explanation that transfers to a new situation.",
+    },
+  ],
+  reviewCards: [
+    {
+      id: "no-carbon-dioxide",
+      question: "What if a leaf had light and water, but no carbon dioxide?",
+      answer: "It could not build glucose because carbon dioxide supplies the carbon atoms that become part of the sugar.",
+    },
+    {
+      id: "no-water",
+      question: "What if a plant's roots could no longer absorb water?",
+      answer: "Photosynthesis would slow or stop because water is one of its material inputs—and the plant would also lose the water pressure that keeps it upright.",
+    },
+    {
+      id: "darkness",
+      question: "What if a healthy plant stayed in darkness for several days?",
+      answer: "It could keep respiring stored glucose for a while, but without light energy it could not make new glucose through photosynthesis.",
+    },
+    {
+      id: "unbalanced-equation",
+      question: "What if we wrote the photosynthesis equation without balancing it?",
+      answer: "The equation would not account for equal numbers of each atom on both sides, so it would fail to represent conservation of matter.",
     },
   ],
   misconceptions: [

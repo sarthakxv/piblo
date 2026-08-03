@@ -20,7 +20,6 @@ import {
 } from "@/features/session/session-schema.ts";
 import { DiagnosticStage } from "./diagnostic-stage.tsx";
 import { LearningChat } from "./learning-chat.tsx";
-import { ReflectionStage } from "./reflection-stage.tsx";
 import { TopicComplete } from "./topic-complete.tsx";
 import { TopicOverview } from "./topic-overview.tsx";
 
@@ -209,21 +208,12 @@ export function TopicLearningWorkspace({
                 error={error}
                 onSend={sendMessage}
                 onRetry={retryTurn}
-                onReflect={() => updateSession((current) => ({ ...current, stage: "reflection" }))}
+                onViewRecap={() => updateSession((current) => current.learnerModel?.lessonComplete
+                    ? { ...current, stage: "complete" }
+                    : current)}
             />
         );
     }
 
-    if (session.stage === "reflection" && session.learnerModel) {
-        return (
-            <ReflectionStage
-                concept={concept}
-                session={{ ...session, learnerModel: session.learnerModel }}
-                onUpdateAnswers={updateAnswers}
-                onComplete={() => updateSession((current) => ({ ...current, stage: "complete" }))}
-            />
-        );
-    }
-
-    return <TopicComplete concept={concept} session={session} onRestart={restart} />;
+    return <TopicComplete concept={concept} onRestart={restart} />;
 }

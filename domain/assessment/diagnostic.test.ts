@@ -40,6 +40,16 @@ test("closed diagnostic answers create evidence for the matching milestones", ()
     assert.equal(result.confidence, 0.8);
 });
 
+test("direct correct gas answers complete the gases milestone", () => {
+    const result = scoreDiagnosticAnswers(answersWith({
+        prediction: "Air",
+        observation: "The soil loss is too small",
+        relationships: { "carbon dioxide": "part" },
+    }));
+
+    assert.ok(result.masteryByObjective.gases >= 0.7);
+});
+
 test("diagnostic choices retain evidenced misconceptions", () => {
     const result = scoreDiagnosticAnswers(answersWith({
         prediction: "Soil",

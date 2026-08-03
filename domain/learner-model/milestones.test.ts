@@ -23,4 +23,5 @@ test("milestone trail distinguishes placement mastery from learned mastery", () 
     assert.equal(states[1].status, "complete");
     assert.equal(states[2].status, "current");
     assert.equal(states[3].status, "upcoming");
+    assert.equal(states[0].takeaway, PHOTOSYNTHESIS.objectives[0].takeaway);
 });

@@ -57,7 +57,7 @@ export function scoreDiagnosticAnswers(answers: LessonAnswers): DeterministicDia
 
     if (answers.observation === "The soil loss is too small") mastery.gases += 0.2;
 
-    if (answers.relationships["carbon dioxide"] === "part") mastery.gases += 0.2;
+    if (answers.relationships["carbon dioxide"] === "part") mastery.gases += 0.25;
     if (answers.relationships.water === "part") mastery["water-role"] += 0.25;
     if (answers.relationships.light === "part") mastery["sunlight-job"] += 0.2;
     if (answers.relationships.water === "not-part") misconceptions.add("water_is_food");

@@ -41,7 +41,10 @@ export function ProfileView() {
 
     if (!loaded || !profile) return <main className="min-h-dvh" aria-busy="true" />;
 
-    const completedMilestones = session?.learnerModel
+    const topicPassed = session?.learnerModel?.lessonComplete === true;
+    const completedMilestones = topicPassed
+        ? PHOTOSYNTHESIS.objectives.length
+        : session?.learnerModel
         ? PHOTOSYNTHESIS.objectives.filter(
             (objective) => (
                 session.learnerModel?.masteryByObjective[objective.id] ?? 0
@@ -53,9 +56,9 @@ export function ProfileView() {
         diagnostic: "Getting to know your starting point",
         analyzing: "Analyzing your starting point",
         chat: "Learning with Piblo",
-        reflection: "Reflecting on your understanding",
         complete: "Topic complete",
     }[session?.stage ?? "overview"];
+    const visibleStageLabel = topicPassed ? "Topic complete" : stageLabel;
 
     const clearLocalData = () => {
         clearAllTopicSessions();
@@ -100,10 +103,10 @@ export function ProfileView() {
                             <p className="text-xs font-bold uppercase tracking-wide text-graphite-muted">Photosynthesis</p>
                             {session ? (
                                 <>
-                                    <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{stageLabel}</p>
+                                    <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{visibleStageLabel}</p>
                                     <p className="mt-2 text-sm leading-6 text-graphite-soft">{completedMilestones} of {PHOTOSYNTHESIS.objectives.length} understanding milestones completed.</p>
                                     <Button nativeButton={false} render={<Link href="/learn/photosynthesis/recommended" />} className="mt-5 bg-graphite text-paper-raised">
-                                        {session.stage === "complete" ? "Review topic" : "Resume topic"}
+                                        {topicPassed ? "Review topic" : "Resume topic"}
                                     </Button>
                                 </>
                             ) : (

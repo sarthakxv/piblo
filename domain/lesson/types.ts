@@ -27,8 +27,6 @@ export const LessonAnswersSchema = z.object({
     }),
     application: z.string(),
     applicationReason: z.string(),
-    reflection: z.string(),
-    reflectionEvidence: z.string(),
 });
 
 export type LessonAnswers = z.infer<typeof LessonAnswersSchema>;
@@ -71,15 +69,9 @@ export const PHASES: PhaseDefinition[] = [
         learnerLabel: "Try it somewhere new",
         eyebrow: "Test the idea in a new situation",
     },
-    {
-        key: "reflect",
-        trailLabel: "Reflection",
-        learnerLabel: "Look back",
-        eyebrow: "Notice how your thinking changed",
-    },
 ];
 
-export const DIAGNOSTIC_PHASES = PHASES.slice(0, 5);
+export const DIAGNOSTIC_PHASES = PHASES;
 
 export const EMPTY_ANSWERS: LessonAnswers = {
     prediction: "",
@@ -97,6 +89,4 @@ export const EMPTY_ANSWERS: LessonAnswers = {
     },
     application: "",
     applicationReason: "",
-    reflection: "",
-    reflectionEvidence: "",
 };

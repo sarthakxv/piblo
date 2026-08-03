@@ -21,8 +21,6 @@ export function canSubmitMove(phaseIndex: number, answers: LessonAnswers): boole
             return Object.values(answers.generalization).every((value) => value.trim());
         case 4:
             return Boolean(answers.application && answers.applicationReason.trim());
-        case 5:
-            return Boolean(answers.reflection.trim() && answers.reflectionEvidence.trim());
         default:
             return false;
     }

@@ -46,7 +46,7 @@ export function TopicPicker({
                             aria-label="Show topics"
                             className="group absolute right-1 flex size-11 items-center justify-center rounded-md text-graphite-muted outline-none hover:text-graphite focus-visible:ring-2 focus-visible:ring-ink/40 data-popup-open:text-graphite"
                         >
-                            <ChevronDown aria-hidden="true" className="size-5 group-data-[popup-open]:rotate-180" strokeWidth={2.25} />
+                            <ChevronDown aria-hidden="true" className="size-5 transition-transform duration-150 group-data-popup-open:rotate-180" strokeWidth={2.25} />
                         </Combobox.Trigger>
                     </Combobox.InputGroup>
 

@@ -16,7 +16,7 @@ export function LearningChat({
     error,
     onSend,
     onRetry,
-    onReflect,
+    onViewRecap,
 }: {
     concept: Concept;
     session: TopicSession & { learnerModel: NonNullable<TopicSession["learnerModel"]> };
@@ -24,7 +24,7 @@ export function LearningChat({
     error: string;
     onSend: (message: string) => void;
     onRetry: () => void;
-    onReflect: () => void;
+    onViewRecap: () => void;
 }) {
     const [draft, setDraft] = useState("");
     const endRef = useRef<HTMLDivElement>(null);
@@ -54,6 +54,8 @@ export function LearningChat({
                 concept={concept}
                 learnerModel={session.learnerModel}
                 initialMasteryByObjective={session.initialMasteryByObjective}
+                recapEnabled={session.learnerModel.lessonComplete}
+                onViewRecap={onViewRecap}
             />
 
             <section className="flex min-h-dvh min-w-0 flex-col">
@@ -68,6 +70,8 @@ export function LearningChat({
                             concept={concept}
                             learnerModel={session.learnerModel}
                             initialMasteryByObjective={session.initialMasteryByObjective}
+                            recapEnabled={session.learnerModel.lessonComplete}
+                            onViewRecap={onViewRecap}
                         />
                     </div>
                 </header>
@@ -119,9 +123,9 @@ export function LearningChat({
 
                 <div className="sticky bottom-0 border-t border-rule bg-paper/95 px-5 py-4 backdrop-blur-sm sm:px-8">
                     {session.learnerModel.lessonComplete ? (
-                        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
+                        <div className="mx-auto max-w-4xl">
                             <p className="text-sm font-semibold text-moss">All five milestones are understood.</p>
-                            <Button type="button" onClick={onReflect} className="bg-graphite px-5 text-paper-raised hover:bg-ink">Reflect on what changed</Button>
+                            <p className="mt-1 text-xs leading-5 text-graphite-muted">Open the understanding trail to view your topic recap.</p>
                         </div>
                     ) : (
                         <>
@@ -131,13 +135,13 @@ export function LearningChat({
                                     <Textarea
                                         id="learner-message"
                                         value={draft}
-                                        rows={2}
+                                        rows={1}
                                         maxLength={8_000}
                                         disabled={busy || Boolean(error)}
                                         onKeyDown={handleKeyDown}
                                         onChange={(event) => setDraft(event.target.value)}
                                         placeholder="Work the idea out here…"
-                                        className="max-h-40 min-h-14 resize-none border-rule-strong bg-paper-inset px-4 py-3 shadow-none focus-visible:border-ink"
+                                        className="max-h-40 min-h-12 resize-none border-rule-strong bg-paper-inset px-4 py-[0.8125rem] [line-height:1.25rem] shadow-none focus-visible:border-ink"
                                     />
                                 </div>
                                 <Button type="submit" size="icon" disabled={!draft.trim() || busy || Boolean(error)} className="size-12 shrink-0 bg-graphite text-paper-raised hover:bg-ink" aria-label="Send answer">

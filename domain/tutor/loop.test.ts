@@ -128,14 +128,26 @@ test("solved advances focus once the objective crosses the mastery threshold", (
   assert.equal(after.consecutiveStuck, 0);
 });
 
-test("terminal: prior rung 3 records the reveal, advances focus, resets, no mastery bump", () => {
+test("solved completes the milestone even when the analyzer delta is conservative", () => {
+  const before = model({ focusObjective: "gases", masteryByObjective: { gases: 0.2 } });
+  const after = applyAnalysis(
+    before,
+    result({ addressedObjective: "gases", scaffoldSignal: "solved", masteryDeltas: { gases: 0.1 } }),
+    C,
+  );
+
+  assert.equal(after.masteryByObjective.gases, MASTERY_THRESHOLD);
+  assert.equal(after.focusObjective, "water-role");
+});
+
+test("terminal: prior rung 3 records support and completes the milestone before advancing", () => {
   const before = model({ focusObjective: "water-role", scaffoldRung: 3, masteryByObjective: { "water-role": 0.2 }, answerRevealed: [] });
   const after = applyAnalysis(before, result({ addressedObjective: "water-role", scaffoldSignal: "progressing", masteryDeltas: {} }), C);
   assert.deepEqual(after.answerRevealed, ["water-role"]);
   assert.notEqual(after.focusObjective, "water-role"); // advanced past the revealed one
   assert.equal(after.scaffoldRung, 0);
   assert.equal(after.consecutiveStuck, 0);
-  assert.equal(after.masteryByObjective["water-role"], 0.2); // not bumped by the reveal
+  assert.equal(after.masteryByObjective["water-role"], MASTERY_THRESHOLD);
 });
 
 test("emptyLearnerModel starts with lessonComplete=false", () => {
@@ -153,6 +165,22 @@ test("lessonComplete becomes true once every objective's mastery crosses the thr
     result({ addressedObjective: lastId, scaffoldSignal: "solved", masteryDeltas: { [lastId]: 0.3 } }),
     C,
   );
+  assert.equal(after.lessonComplete, true);
+  assert.equal(after.focusObjective, null);
+});
+
+test("final solved signal completes the lesson despite a small analyzer delta", () => {
+  const lastId = C.objectives[C.objectives.length - 1].id;
+  const almostAllMastered = Object.fromEntries(
+    C.objectives.map((o) => [o.id, o.id === lastId ? 0.1 : MASTERY_THRESHOLD]),
+  );
+  const after = applyAnalysis(
+    model({ masteryByObjective: almostAllMastered, focusObjective: lastId }),
+    result({ addressedObjective: lastId, scaffoldSignal: "solved", masteryDeltas: { [lastId]: 0.05 } }),
+    C,
+  );
+
+  assert.equal(after.masteryByObjective[lastId], MASTERY_THRESHOLD);
   assert.equal(after.lessonComplete, true);
   assert.equal(after.focusObjective, null);
 });

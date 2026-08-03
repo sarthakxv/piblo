@@ -5,7 +5,6 @@ import { ExplanationMove } from "./explanation-move.tsx";
 import { GeneralizationMove } from "./generalization-move.tsx";
 import { ObservationMove } from "./observation-move.tsx";
 import { PredictionMove } from "./prediction-move.tsx";
-import { ReflectionMove } from "./reflection-move.tsx";
 import type { LearningMoveProps } from "./types.ts";
 
 const MOVES = [
@@ -14,7 +13,6 @@ const MOVES = [
     ExplanationMove,
     GeneralizationMove,
     ApplicationMove,
-    ReflectionMove,
 ];
 
 export function MoveRenderer({ phaseIndex, ...props }: LearningMoveProps & { phaseIndex: number }) {

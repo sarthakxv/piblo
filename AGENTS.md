@@ -43,4 +43,6 @@ Tests use `node:test` with `node:assert/strict`. Add colocated tests named `*.te
 
 Recent history uses concise imperative commits, often Conventional Commit-style: `feat(tutor): ...`, `fix(tutor): ...`, and `refactor(llm): ...`. Use a scoped prefix when it clarifies the affected module. Keep each commit focused.
 
+Never stage or commit changes under `docs/`; keep those changes local.
+
 Pull requests should explain the learner-facing behavior change, identify affected modules, link related issues or design notes, and include test results. Provide terminal output or screenshots only when a CLI or UI behavior changes.
