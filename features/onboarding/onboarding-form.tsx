@@ -8,6 +8,7 @@ import { FieldLabel } from "@/components/learning-moves/move-shared.tsx";
 import { DateOfBirthField } from "./date-of-birth-field.tsx";
 import { parseDateOfBirth, type DateOfBirthParts } from "@/features/learner-profile/profile-schema.ts";
 import { useLearnerProfile } from "@/features/learner-profile/use-learner-profile.ts";
+import { TopicLibrary } from "@/features/library/topic-library.tsx";
 import { cn } from "@/lib/utils";
 
 export function OnboardingForm() {
@@ -49,7 +50,8 @@ export function OnboardingForm() {
         router.push("/library");
     };
 
-    if (!loaded || profile) return <main className="min-h-dvh" aria-busy="true" />;
+    if (!loaded) return <main className="min-h-dvh" aria-busy="true" />;
+    if (profile) return <TopicLibrary initialProfile={profile} />;
 
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">

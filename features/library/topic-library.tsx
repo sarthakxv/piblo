@@ -4,21 +4,28 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TOPICS } from "@/content/topics.ts";
+import type { LearnerProfile } from "@/features/learner-profile/profile-schema.ts";
 import { useLearnerProfile } from "@/features/learner-profile/use-learner-profile.ts";
 import { TopicPicker } from "./topic-picker.tsx";
 import { LearningPath } from "./learning-path.tsx";
 
-export function TopicLibrary() {
+type TopicLibraryProps = {
+    initialProfile?: LearnerProfile;
+};
+
+export function TopicLibrary({ initialProfile }: TopicLibraryProps = {}) {
     const router = useRouter();
-    const { profile, loaded, storageWarning } = useLearnerProfile();
+    const { profile: storedProfile, loaded, storageWarning } = useLearnerProfile();
     const [selectedTopicId, setSelectedTopicId] = useState(TOPICS[0].id);
     const [expandedLevelId, setExpandedLevelId] = useState<string | null>(null);
+    const profile = storedProfile ?? initialProfile ?? null;
+    const profileLoaded = loaded || Boolean(initialProfile);
 
     useEffect(() => {
-        if (loaded && !profile) router.replace("/");
-    }, [loaded, profile, router]);
+        if (profileLoaded && !profile) router.replace("/");
+    }, [profileLoaded, profile, router]);
 
-    if (!loaded || !profile) return <main className="min-h-dvh" aria-busy="true" />;
+    if (!profileLoaded || !profile) return <main className="min-h-dvh" aria-busy="true" />;
 
     const selectedTopic = TOPICS.find((topic) => topic.id === selectedTopicId) ?? TOPICS[0];
     const firstName = profile.name.split(/\s+/)[0];
