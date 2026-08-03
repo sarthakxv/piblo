@@ -11,7 +11,7 @@ interface LearningPageProps {
 export async function generateMetadata({ params }: LearningPageProps): Promise<Metadata> {
     const { topicId } = await params;
     const topic = findTopic(topicId);
-    return { title: topic ? `${topic.name} · Piblo` : "Learning path" };
+    return { title: topic ? `${topic.name}` : "Learning path" };
 }
 
 export default async function LearningPage({ params }: LearningPageProps) {

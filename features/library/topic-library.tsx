@@ -33,10 +33,7 @@ export function TopicLibrary({ initialProfile }: TopicLibraryProps = {}) {
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-6xl">
                 <header className="flex items-center justify-between gap-4 border-b border-rule pb-5">
-                    <div>
-                        <Link href="/library" className="font-notebook text-2xl font-bold text-graphite">Piblo</Link>
-                        <p className="text-xs text-graphite-muted">A learning space that thinks with you</p>
-                    </div>
+                    <img src="/logo-text.svg" alt="Piblo" className="h-7 w-auto" />
                     <Link href="/profile" className="rounded-lg border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-graphite-soft transition-colors duration-150 hover:border-rule-strong hover:text-graphite">{firstName}&apos;s profile</Link>
                 </header>
 

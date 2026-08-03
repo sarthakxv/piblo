@@ -56,9 +56,8 @@ export function OnboardingForm() {
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-6xl">
-                <header className="border-b border-rule pb-5">
-                    <p className="font-notebook text-2xl font-bold text-graphite">Piblo</p>
-                    <p className="text-xs text-graphite-soft">A learning space that thinks with you</p>
+                <header>
+                    <img src="/logo-text.svg" alt="Piblo" className="h-7 w-auto" />
                 </header>
 
                 <div className="grid gap-10 py-10 lg:min-h-[calc(100dvh-7rem)] lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-center lg:gap-16 lg:py-16">
