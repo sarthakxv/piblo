@@ -46,3 +46,11 @@ Recent history uses concise imperative commits, often Conventional Commit-style:
 Never stage or commit changes under `docs/`; keep those changes local.
 
 Pull requests should explain the learner-facing behavior change, identify affected modules, link related issues or design notes, and include test results. Provide terminal output or screenshots only when a CLI or UI behavior changes.
+
+## Cursor Cloud specific instructions
+
+This is a self-contained Next.js app with no database, Docker, or external services to start. Learner profiles and topic sessions persist in the browser (localStorage/cookies), so the web app runs fully standalone.
+
+- Standard commands live in `package.json` and the "Build, Test, and Development Commands" section above. Use `npm run dev` (http://localhost:3000) for development; `npm test`, `npm run typecheck`, and `npm run build` for verification. There is no lint script — `npm run typecheck` is the closest static check.
+- The web learning workspace (onboarding, library, `/learn/...`) uses deterministic lesson moves and needs no API key. Only the live model pipeline — `npm run demo`, `npm run chat`, and the `/api/tutor` and `/api/learning/start` routes — requires `OPENCODE_API_KEY` (OpenAI-compatible gateway). Without it, those specific paths fail, but the rest of the app works.
+- The home route `/` redirects to `/library` once a learner profile cookie is set (see `middleware.ts`), so a returning session skips onboarding.
