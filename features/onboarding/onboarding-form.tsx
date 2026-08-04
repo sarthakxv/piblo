@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,26 +10,27 @@ import { parseDateOfBirth, type DateOfBirthParts } from "@/features/learner-prof
 import { useLearnerProfile } from "@/features/learner-profile/use-learner-profile.ts";
 import { cn } from "@/lib/utils";
 
-export function OnboardingForm() {
+interface OnboardingFormProps {
+    initialName: string;
+    email: string | null;
+}
+
+export function OnboardingForm({ initialName, email }: OnboardingFormProps) {
     const router = useRouter();
-    const { profile, loaded, saveProfile } = useLearnerProfile();
-    const [name, setName] = useState("");
+    const { saveProfile } = useLearnerProfile();
+    const [name, setName] = useState(initialName);
     const [dateOfBirth, setDateOfBirth] = useState<DateOfBirthParts>({ day: "", month: "", year: "" });
-    const [errors, setErrors] = useState<{ name?: string; dateOfBirth?: string }>({});
+    const [errors, setErrors] = useState<{ name?: string; dateOfBirth?: string; form?: string }>({});
+    const [submitting, setSubmitting] = useState(false);
     const nameRef = useRef<HTMLInputElement>(null);
     const dateOfBirthDayRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (!loaded || !profile) return;
-        router.replace("/library");
-    }, [loaded, profile, router]);
 
     const updateDateOfBirth = (part: keyof DateOfBirthParts, value: string) => {
         setDateOfBirth((current) => ({ ...current, [part]: value }));
         if (errors.dateOfBirth) setErrors((current) => ({ ...current, dateOfBirth: undefined }));
     };
 
-    const submitProfile = (event: FormEvent<HTMLFormElement>) => {
+    const submitProfile = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const normalizedName = name.trim().replace(/\s+/g, " ");
         const normalizedDateOfBirth = parseDateOfBirth(
@@ -46,11 +47,15 @@ export function OnboardingForm() {
         if (nextErrors.name) return nameRef.current?.focus();
         if (nextErrors.dateOfBirth || !normalizedDateOfBirth) return dateOfBirthDayRef.current?.focus();
 
-        saveProfile({ version: 1, name: normalizedName, dateOfBirth: normalizedDateOfBirth });
+        setSubmitting(true);
+        const saved = await saveProfile({ name: normalizedName, dateOfBirth: normalizedDateOfBirth });
+        if (!saved) {
+            setSubmitting(false);
+            setErrors({ form: "Could not save your profile. Check your connection and try again." });
+            return;
+        }
         router.push("/library");
     };
-
-    if (!loaded || profile) return <main className="min-h-dvh" aria-busy="true" />;
 
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
@@ -59,25 +64,14 @@ export function OnboardingForm() {
                     <img src="/logo-text.svg" alt="Piblo" className="h-7 w-auto" />
                 </header>
 
-                <div className="grid gap-10 py-10 lg:min-h-[calc(100dvh-7rem)] lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-center lg:gap-16 lg:py-16">
-                    <section className="max-w-2xl">
-                        <p className="text-sm font-bold text-ink">A guided way to work ideas out</p>
-                        <h1 className="mt-4 max-w-xl text-balance font-notebook text-4xl font-bold leading-tight text-graphite sm:text-5xl">Bring what you know. Leave with a clearer idea.</h1>
-                        <p className="mt-6 max-w-xl text-pretty text-lg leading-8 text-graphite-soft">Piblo gives you evidence, small challenges, and the right amount of help while you build an explanation for yourself.</p>
-                        <div className="mt-10 max-w-xl border-l-2 border-ink pl-5">
-                            <p className="text-xs font-bold uppercase tracking-wide text-graphite-soft">Your thinking trail</p>
-                            <ol className="mt-3 flex flex-wrap items-center gap-2 font-notebook text-lg font-semibold text-graphite">
-                                <li>Prediction</li><li aria-hidden="true" className="text-rule-strong">→</li><li>Evidence</li><li aria-hidden="true" className="text-rule-strong">→</li><li>Explanation</li>
-                            </ol>
-                            <p className="mt-2 text-sm leading-6 text-graphite-soft">Start with your own idea, then make it stronger.</p>
-                        </div>
-                    </section>
-
-                    <section aria-labelledby="onboarding-title" className="rounded-xl border border-rule bg-paper-raised p-6 sm:p-8">
+                <div className="grid py-10 lg:min-h-[calc(100dvh-7rem)] lg:place-items-center lg:py-16">
+                    <section aria-labelledby="onboarding-title" className="w-full max-w-md rounded-xl border border-rule bg-paper-raised p-6 sm:p-8">
                         <div className="h-1 w-16 rounded-full bg-ink" aria-hidden="true" />
-                        <p className="mt-7 text-xs font-bold uppercase tracking-wide text-graphite-soft">Before we begin</p>
+                        <p className="mt-7 text-xs font-bold uppercase tracking-wide text-graphite-soft">One last step</p>
                         <h2 id="onboarding-title" className="mt-3 text-balance font-notebook text-3xl font-bold leading-tight text-graphite">Let&apos;s set up your learning space.</h2>
-                        <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">No account or password needed. Just tell us what to call you.</p>
+                        <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">
+                            {email ? `Signed in as ${email}. ` : ""}Just tell us what to call you — the rest comes from your Google account.
+                        </p>
 
                         <form className="mt-8" noValidate onSubmit={submitProfile}>
                             <FieldLabel htmlFor="learner-name">Your name</FieldLabel>
@@ -101,8 +95,11 @@ export function OnboardingForm() {
                             {errors.name ? <p id="learner-name-error" role="alert" className="mt-2 text-sm font-medium text-coral">{errors.name}</p> : null}
 
                             <DateOfBirthField value={dateOfBirth} error={errors.dateOfBirth} dayRef={dateOfBirthDayRef} onChange={updateDateOfBirth} />
-                            <Button type="submit" className="mt-7 min-h-12 w-full bg-graphite px-5 font-semibold text-paper-raised hover:bg-ink">Continue to Piblo</Button>
-                            <p className="mt-4 text-center text-xs leading-5 text-graphite-soft">For now, your details stay only in this browser.</p>
+                            <Button type="submit" disabled={submitting} className="mt-7 min-h-12 w-full bg-graphite px-5 font-semibold text-paper-raised hover:bg-ink">
+                                {submitting ? "Saving…" : "Continue to Piblo"}
+                            </Button>
+                            {errors.form ? <p role="alert" className="mt-2 text-sm font-medium text-coral">{errors.form}</p> : null}
+                            <p className="mt-4 text-center text-xs leading-5 text-graphite-soft">Saved to your account, so it follows you across devices.</p>
                         </form>
                     </section>
                 </div>

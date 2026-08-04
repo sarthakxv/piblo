@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
 import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     AlertDialog,
     AlertDialogClose,
@@ -20,6 +21,7 @@ import { PHOTOSYNTHESIS } from "@/content/concepts/photosynthesis.ts";
 import { MASTERY_THRESHOLD } from "@/domain/learner-model/types.ts";
 import { clearAllTopicSessions, readTopicSession } from "@/features/session/session-storage.ts";
 import type { TopicSession } from "@/features/session/session-schema.ts";
+import { createClient } from "@/lib/supabase/client.ts";
 import { useLearnerProfile } from "./use-learner-profile.ts";
 
 const BIRTH_DATE_FORMAT = new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" });
@@ -30,16 +32,16 @@ function formatBirthDate(dateOfBirth: string) {
 
 export function ProfileView() {
     const router = useRouter();
-    const { profile, loaded, resetProfile } = useLearnerProfile();
+    const { profile, loaded } = useLearnerProfile();
     const [session, setSession] = useState<TopicSession | null>(null);
+    const [sessionLoaded, setSessionLoaded] = useState(false);
 
     useEffect(() => {
-        if (loaded && !profile) {
-            router.replace("/");
-            return;
+        if (loaded) {
+            setSession(readTopicSession("photosynthesis", "recommended"));
+            setSessionLoaded(true);
         }
-        if (loaded) setSession(readTopicSession("photosynthesis", "recommended"));
-    }, [loaded, profile, router]);
+    }, [loaded]);
 
     if (!loaded || !profile) return <main className="min-h-dvh" aria-busy="true" />;
 
@@ -64,14 +66,22 @@ export function ProfileView() {
 
     const clearLocalData = () => {
         clearAllTopicSessions();
-        resetProfile();
-        router.replace("/");
+        setSession(null);
     };
+
+    const signOut = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.replace("/");
+        router.refresh();
+    };
+
+    const initial = profile.name.trim().charAt(0).toUpperCase();
 
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-5xl">
-                <AppHeader learnerName={profile.name} />
+                <AppHeader learnerName={profile.name} email={profile.email} avatarUrl={profile.avatarUrl} />
 
                 <section className="py-10 sm:py-14">
                     <div className="flex items-center gap-4">
@@ -85,7 +95,7 @@ export function ProfileView() {
                         <div>
                             <p className="text-sm font-bold text-ink">Your learning record</p>
                             <h1 className="mt-1 font-notebook text-4xl font-bold text-graphite">{profile.name}</h1>
-                            <p className="mt-2 text-sm text-graphite-soft">This information is stored only in this browser.</p>
+                            <p className="mt-2 text-sm text-graphite-soft">Saved to your account, so it follows you across devices.</p>
                         </div>
                     </div>
 
@@ -106,7 +116,7 @@ export function ProfileView() {
 
                         <article className="rounded-xl border border-rule bg-paper-raised p-6">
                             <p className="text-xs font-bold uppercase tracking-wide text-graphite-muted">Photosynthesis</p>
-                            {session ? (
+                            {sessionLoaded && session ? (
                                 <>
                                     <p className="mt-4 font-notebook text-2xl font-bold text-graphite">{visibleStageLabel}</p>
                                     <p className="mt-2 text-sm leading-6 text-graphite-soft">{completedMilestones} of {PHOTOSYNTHESIS.objectives.length} understanding milestones completed.</p>
@@ -122,27 +132,46 @@ export function ProfileView() {
                                 </>
                             )}
                         </article>
-                    </div>
 
-                    <section className="mt-8 border-t border-rule pt-8" aria-labelledby="local-data-title">
-                        <h2 id="local-data-title" className="font-notebook text-2xl font-bold text-graphite">Local data controls</h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-graphite-soft">Clearing your local data removes this profile and all saved topic progress from this browser.</p>
-                        <AlertDialog>
-                            <AlertDialogTrigger render={<Button type="button" variant="outline" className="mt-5 border-coral/50 text-coral" />}>
-                                Clear local data
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="border border-rule bg-paper-raised">
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle className="font-notebook text-2xl font-bold text-graphite">Clear this learner&apos;s data?</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-graphite-soft">This removes the profile and all saved topic progress from this browser. It cannot be undone.</AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogClose render={<Button variant="outline" className="border-rule-strong" />}>Keep data</AlertDialogClose>
-                                    <Button type="button" onClick={clearLocalData} className="bg-coral text-white hover:bg-coral/85">Clear data</Button>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </section>
+                        <article className="rounded-xl border border-rule bg-paper-raised p-6">
+                            <p className="text-xs font-bold uppercase tracking-wide text-graphite-muted">Account</p>
+                            <div className="mt-5 flex items-center gap-3">
+                                <Avatar className="size-10 after:border-rule">
+                                    {profile.avatarUrl ? <AvatarImage src={profile.avatarUrl} alt="" /> : null}
+                                    <AvatarFallback className="bg-ink text-sm font-bold text-paper-raised">{initial}</AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-graphite">{profile.name}</p>
+                                    {profile.email ? <p className="truncate text-xs text-graphite-muted">{profile.email}</p> : null}
+                                </div>
+                            </div>
+                            <p className="mt-4 text-sm leading-6 text-graphite-soft">Signed in with Google. Your learner details live in your Piblo account.</p>
+                            <Button type="button" variant="outline" onClick={signOut} className="mt-5 border-rule-strong text-graphite">
+                                <LogOut aria-hidden="true" className="size-4" />
+                                Sign out
+                            </Button>
+                        </article>
+
+                        <article className="rounded-xl border border-rule bg-paper-raised p-6">
+                            <p className="text-xs font-bold uppercase tracking-wide text-graphite-muted">Local data controls</p>
+                            <p className="mt-4 text-sm leading-6 text-graphite-soft">Topic progress is still kept only in this browser for now. Clearing it does not affect your account profile.</p>
+                            <AlertDialog>
+                                <AlertDialogTrigger render={<Button type="button" variant="outline" className="mt-5 border-coral/50 text-coral" />}>
+                                    Clear local progress
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="border border-rule bg-paper-raised">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="font-notebook text-2xl font-bold text-graphite">Clear saved topic progress?</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-graphite-soft">This removes all topic progress stored in this browser. Your account profile is not affected. It cannot be undone.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogClose render={<Button variant="outline" className="border-rule-strong" />}>Keep data</AlertDialogClose>
+                                        <AlertDialogClose render={<Button type="button" onClick={clearLocalData} className="bg-coral text-white hover:bg-coral/85" />}>Clear progress</AlertDialogClose>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </article>
+                    </div>
                 </section>
             </div>
         </main>

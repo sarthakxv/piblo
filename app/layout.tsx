@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Script from "next/script";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import {
-    PROFILE_PRESENT_COOKIE,
-    PROFILE_STORAGE_KEY,
-} from "@/features/learner-profile/profile-schema.ts";
 import "./globals.css";
 
 const SITE_URL = "https://piblo-app.vercel.app";
 const SITE_DESCRIPTION = "A learning companion designed to nurture curiosity";
-
-const PROFILE_ROUTE_BOOTSTRAP = `(function(){try{if(location.pathname!=="/")return;if(!localStorage.getItem(${JSON.stringify(PROFILE_STORAGE_KEY)}))return;var secure=location.protocol==="https:"?"; Secure":"";document.cookie=${JSON.stringify(`${PROFILE_PRESENT_COOKIE}=1; path=/; max-age=31536000; SameSite=Lax`)}+secure;location.replace("/library");}catch{}})();`;
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
@@ -67,9 +60,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     return (
         <html lang="en">
             <body>
-                <Script id="profile-route-bootstrap" strategy="beforeInteractive">
-                    {PROFILE_ROUTE_BOOTSTRAP}
-                </Script>
                 <TooltipProvider>{children}</TooltipProvider>
             </body>
         </html>

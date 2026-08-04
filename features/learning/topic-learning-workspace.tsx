@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 import type { Concept } from "@/content/concepts/types.ts";
 import type { LearningLevelId } from "@/content/topics.ts";
@@ -40,16 +39,11 @@ export function TopicLearningWorkspace({
     concept: Concept;
     levelId: LearningLevelId;
 }) {
-    const router = useRouter();
     const { profile, loaded: profileLoaded } = useLearnerProfile();
     const [session, setSession] = useState<TopicSession | null>(null);
     const [sessionLoaded, setSessionLoaded] = useState(false);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
-
-    useEffect(() => {
-        if (profileLoaded && !profile) router.replace("/");
-    }, [profile, profileLoaded, router]);
 
     useEffect(() => {
         const stored = readTopicSession(concept.id, levelId);
