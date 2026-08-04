@@ -50,7 +50,7 @@ export function LearningPath({ topic }: { topic: TopicDefinition }) {
                                         render={<Link href={`/learn/${topic.id}/${level.id}`} />}
                                         className="mt-5 bg-graphite px-5 text-paper-raised hover:bg-ink"
                                     >
-                                        Begin recommended path
+                                        Begin path
                                         <ArrowRight aria-hidden="true" className="size-4" />
                                     </Button>
                                 ) : null}

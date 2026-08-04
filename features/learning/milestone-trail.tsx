@@ -50,13 +50,13 @@ function TrailItems({ milestones }: { milestones: MilestoneState[] }) {
                                 "mt-1 text-xs leading-5",
                                 current || done ? "text-graphite-soft" : "text-graphite-muted",
                             )}>{milestone.takeaway}</p>
-                            {milestone.status === "already-understood" ? (
+                            {/*{milestone.status === "already-understood" ? (
                                 <p className="mt-1 text-[0.6875rem] font-bold uppercase tracking-wide text-moss">Already understood</p>
                             ) : milestone.status === "complete" ? (
                                 <p className="mt-1 text-[0.6875rem] font-bold uppercase tracking-wide text-moss">Understood</p>
                             ) : current ? (
                                 <p className="mt-1 text-[0.6875rem] font-bold uppercase tracking-wide text-ink">Working here</p>
-                            ) : null}
+                            ) : null}*/}
                         </div>
                     </li>
                 );

@@ -53,7 +53,7 @@ export function TopicPicker({
                     <Combobox.Portal>
                         <Combobox.Positioner className="z-50 outline-none" sideOffset={8}>
                             <Combobox.Popup className="w-[var(--anchor-width)] max-w-[var(--available-width)] rounded-lg border border-rule bg-paper-raised p-2 text-graphite">
-                                <Combobox.Empty className="px-3 py-4 text-sm leading-6 text-graphite-soft">
+                                <Combobox.Empty className="px-3 py-4 text-sm leading-6 text-graphite-soft empty:p-0">
                                     No topics match. Try another search.
                                 </Combobox.Empty>
                                 <Combobox.List className="max-h-[min(24rem,var(--available-height))] overflow-y-auto overscroll-contain outline-none data-empty:p-0">
