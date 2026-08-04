@@ -1,15 +1,12 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { PROFILE_PRESENT_COOKIE } from "@/features/learner-profile/profile-schema.ts";
+import { updateSession } from "@/lib/supabase/middleware.ts";
 
-export function middleware(request: NextRequest) {
-    if (request.cookies.get(PROFILE_PRESENT_COOKIE)?.value === "1") {
-        return NextResponse.redirect(new URL("/library", request.url));
-    }
-
-    return NextResponse.next();
+export async function middleware(request: NextRequest) {
+    return updateSession(request);
 }
 
 export const config = {
-    matcher: "/",
+    matcher: [
+        "/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    ],
 };
