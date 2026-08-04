@@ -6,6 +6,7 @@ import {
     clearLearnerProfile,
     readLearnerProfile,
     storeLearnerProfile,
+    syncProfilePresentCookie,
 } from "./profile-storage.ts";
 
 export function useLearnerProfile() {
@@ -14,7 +15,9 @@ export function useLearnerProfile() {
     const [storageWarning, setStorageWarning] = useState(false);
 
     useEffect(() => {
-        setProfile(readLearnerProfile());
+        const next = readLearnerProfile();
+        setProfile(next);
+        syncProfilePresentCookie(Boolean(next));
         setLoaded(true);
     }, []);
 

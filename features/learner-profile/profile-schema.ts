@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const PROFILE_STORAGE_KEY = "piblo-demo-profile-v1";
+export const PROFILE_PRESENT_COOKIE = "piblo-has-profile";
 
 export interface DateOfBirthParts {
     day: string;
