@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-export const PROFILE_STORAGE_KEY = "piblo-demo-profile-v1";
-export const PROFILE_PRESENT_COOKIE = "piblo-has-profile";
-
 export interface DateOfBirthParts {
     day: string;
     month: string;
@@ -46,8 +43,7 @@ export function parseDateOfBirth(
     return `${yearText}-${monthText}-${dayText}`;
 }
 
-export const LearnerProfileSchema = z.object({
-    version: z.literal(1),
+export const LearnerProfileInputSchema = z.object({
     name: z.string().trim().min(1).max(80),
     dateOfBirth: z.string().refine((value) => {
         const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -55,4 +51,10 @@ export const LearnerProfileSchema = z.object({
     }),
 });
 
-export type LearnerProfile = z.infer<typeof LearnerProfileSchema>;
+export type LearnerProfileInput = z.infer<typeof LearnerProfileInputSchema>;
+
+export interface LearnerProfile extends LearnerProfileInput {
+    id: string;
+    email: string | null;
+    avatarUrl: string | null;
+}
