@@ -173,13 +173,14 @@ export function TopicLearningWorkspace({
     }
 
     if (session.stage === "overview") {
-        return <TopicOverview concept={concept} onBegin={() => updateSession((current) => ({ ...current, stage: "diagnostic" }))} />;
+        return <TopicOverview concept={concept} learnerName={profile.name} onBegin={() => updateSession((current) => ({ ...current, stage: "diagnostic" }))} />;
     }
 
     if (session.stage === "diagnostic" || session.stage === "analyzing") {
         return (
             <DiagnosticStage
                 topicTitle={concept.title}
+                learnerName={profile.name}
                 step={session.diagnosticStep}
                 answers={session.answers}
                 analyzing={session.stage === "analyzing" || busy}
@@ -215,5 +216,5 @@ export function TopicLearningWorkspace({
         );
     }
 
-    return <TopicComplete concept={concept} onRestart={restart} />;
+    return <TopicComplete concept={concept} learnerName={profile.name} onRestart={restart} />;
 }

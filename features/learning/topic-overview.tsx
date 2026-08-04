@@ -1,16 +1,13 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button";
 import type { Concept } from "@/content/concepts/types.ts";
 
-export function TopicOverview({ concept, onBegin }: { concept: Concept; onBegin: () => void }) {
+export function TopicOverview({ concept, learnerName, onBegin }: { concept: Concept; learnerName: string; onBegin: () => void }) {
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-7xl">
-                <header className="flex items-center justify-between border-b border-rule pb-5">
-                    <Link href="/library" className="font-notebook text-2xl font-bold text-graphite">Piblo</Link>
-                    <span className="text-xs font-bold uppercase tracking-wide text-graphite-muted">Recommended path</span>
-                </header>
+                <AppHeader learnerName={learnerName} />
 
                 <section className="flex min-h-[calc(100dvh-7rem)] flex-col justify-center py-12" aria-labelledby="topic-overview-title">
                     <div className="mx-auto max-w-3xl text-center">

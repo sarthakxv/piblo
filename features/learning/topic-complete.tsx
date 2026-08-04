@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RotateCcw } from "lucide-react";
+import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button";
 import type { Concept } from "@/content/concepts/types.ts";
 import { CompletedMilestoneRecap } from "./completed-milestone-recap.tsx";
@@ -7,19 +8,18 @@ import { ReviewFlashcards } from "./review-flashcards.tsx";
 
 export function TopicComplete({
     concept,
+    learnerName,
     onRestart,
 }: {
     concept: Concept;
+    learnerName: string;
     onRestart: () => void;
 }) {
     return (
-        <main className="min-h-dvh">
-            <header className="border-b border-rule px-5 py-5 sm:px-8 lg:px-12">
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-                    <Link href="/library" className="font-notebook text-2xl font-bold text-graphite">Piblo</Link>
-                    <span className="text-sm font-semibold text-moss">Understanding trail complete</span>
-                </div>
-            </header>
+        <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
+            <div className="mx-auto max-w-7xl">
+                <AppHeader learnerName={learnerName} />
+            </div>
 
             <CompletedMilestoneRecap concept={concept} />
 

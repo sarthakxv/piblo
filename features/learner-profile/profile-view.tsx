@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button";
 import {
     AlertDialog,
@@ -69,20 +71,23 @@ export function ProfileView() {
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-5xl">
-                <header className="flex items-center justify-between gap-4 border-b border-rule pb-5">
-                    <div>
-                        <Link href="/library" className="font-notebook text-2xl font-bold text-graphite">Piblo</Link>
-                        <p className="text-xs text-graphite-muted">Learner profile</p>
-                    </div>
-                    <Button nativeButton={false} render={<Link href="/library" />} variant="outline" className="border-rule-strong bg-paper-raised">
-                        Back to library
-                    </Button>
-                </header>
+                <AppHeader learnerName={profile.name} />
 
                 <section className="py-10 sm:py-14">
-                    <p className="text-sm font-bold text-ink">Your learning record</p>
-                    <h1 className="mt-2 font-notebook text-4xl font-bold text-graphite">{profile.name}</h1>
-                    <p className="mt-3 text-sm text-graphite-soft">This information is stored only in this browser.</p>
+                    <div className="flex items-center gap-4">
+                        <Link
+                            href="/library"
+                            aria-label="Back to library"
+                            className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-rule bg-paper-raised text-graphite-soft transition-colors duration-150 hover:border-rule-strong hover:text-graphite"
+                        >
+                            <ArrowLeft aria-hidden="true" className="size-4" />
+                        </Link>
+                        <div>
+                            <p className="text-sm font-bold text-ink">Your learning record</p>
+                            <h1 className="mt-1 font-notebook text-4xl font-bold text-graphite">{profile.name}</h1>
+                            <p className="mt-2 text-sm text-graphite-soft">This information is stored only in this browser.</p>
+                        </div>
+                    </div>
 
                     <div className="mt-9 grid gap-5 md:grid-cols-2">
                         <article className="rounded-xl border border-rule bg-paper-raised p-6">

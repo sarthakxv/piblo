@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
+import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button";
 import { MoveRenderer } from "@/components/learning-moves/move-renderer.tsx";
 import { DIAGNOSTIC_PHASES, type LessonAnswers } from "@/domain/lesson/types.ts";
@@ -7,6 +7,7 @@ import { canSubmitMove } from "@/domain/lesson/transitions.ts";
 
 export function DiagnosticStage({
     topicTitle,
+    learnerName,
     step,
     answers,
     analyzing,
@@ -16,6 +17,7 @@ export function DiagnosticStage({
     onContinue,
 }: {
     topicTitle: string;
+    learnerName: string;
     step: number;
     answers: LessonAnswers;
     analyzing: boolean;
@@ -28,21 +30,16 @@ export function DiagnosticStage({
     const finalStep = step === DIAGNOSTIC_PHASES.length - 1;
 
     return (
-        <main className="min-h-dvh">
-            <header className="border-b border-rule bg-paper-raised">
-                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-                    <div className="flex items-center gap-5">
-                        <Link href="/library" className="font-notebook text-xl font-bold text-graphite">Piblo</Link>
-                        <div className="hidden border-l border-rule pl-5 sm:block">
-                            <p className="text-sm font-semibold text-graphite">{topicTitle}</p>
-                            <p className="text-xs text-graphite-muted">Getting to know what you understand</p>
-                        </div>
-                    </div>
-                    <p className="tabular-nums text-xs font-bold text-graphite-soft">Question {step + 1} of {DIAGNOSTIC_PHASES.length}</p>
-                </div>
-            </header>
+        <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
+            <div className="mx-auto max-w-6xl">
+                <AppHeader learnerName={learnerName} />
+            </div>
 
             <div className="mx-auto max-w-4xl px-5 py-7 sm:px-8 sm:py-12">
+                <div className="mb-6 flex items-center gap-4">
+                    <p className="min-w-0 flex-1 truncate text-sm font-semibold text-graphite">{topicTitle}</p>
+                    <p className="tabular-nums text-xs font-bold text-graphite-soft">Question {step + 1} of {DIAGNOSTIC_PHASES.length}</p>
+                </div>
                 <div className="mb-6 flex gap-2" aria-label={`Question ${step + 1} of ${DIAGNOSTIC_PHASES.length}`}>
                     {DIAGNOSTIC_PHASES.map((diagnosticPhase, index) => (
                         <span

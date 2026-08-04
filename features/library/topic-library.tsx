@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AppHeader } from "@/components/app-header.tsx";
 import { TOPICS } from "@/content/topics.ts";
 import type { LearnerProfile } from "@/features/learner-profile/profile-schema.ts";
 import { useLearnerProfile } from "@/features/learner-profile/use-learner-profile.ts";
@@ -32,10 +32,7 @@ export function TopicLibrary({ initialProfile }: TopicLibraryProps = {}) {
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-6xl">
-                <header className="flex items-center justify-between gap-4 border-b border-rule pb-5">
-                    <img src="/logo-text.svg" alt="Piblo" className="h-7 w-auto" />
-                    <Link href="/profile" className="rounded-lg border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-graphite-soft transition-colors duration-150 hover:border-rule-strong hover:text-graphite">{firstName}&apos;s profile</Link>
-                </header>
+                <AppHeader learnerName={profile.name} />
 
                 <section className="py-8 sm:py-12 lg:py-16" aria-labelledby="library-title">
                     <div className="mb-7 sm:mb-9">
