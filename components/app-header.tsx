@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -49,10 +50,12 @@ export function AppHeader({ learnerName, email, avatarUrl }: AppHeaderProps) {
                     <span className="text-xs font-semibold text-graphite-soft">{firstName}</span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 border border-rule bg-paper-raised text-graphite">
-                    <DropdownMenuLabel className="px-3 py-2">
-                        <span className="block text-sm font-semibold text-graphite">{learnerName}</span>
-                        {email ? <span className="mt-0.5 block text-xs font-normal text-graphite-muted">{email}</span> : null}
-                    </DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                        <DropdownMenuLabel className="px-3 py-2">
+                            <span className="block text-sm font-semibold text-graphite">{learnerName}</span>
+                            {email ? <span className="mt-0.5 block text-xs font-normal text-graphite-muted">{email}</span> : null}
+                        </DropdownMenuLabel>
+                    </DropdownMenuGroup>
                     <DropdownMenuSeparator className="bg-rule" />
                     <DropdownMenuItem
                         className="cursor-pointer px-3 py-2 text-sm focus:bg-paper-inset focus:text-graphite"
