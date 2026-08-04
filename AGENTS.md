@@ -5,7 +5,7 @@
 This is a Next.js application for a Socratic tutor and learner-model analyzer.
 
 - `app/` contains App Router pages, layouts, and server route handlers.
-- `components/ui/` contains shadcn primitives; product components live under `components/learning-moves/` and `components/lesson-shell/`.
+- `components/ui/` contains shadcn primitives; product components live under `components/learning-moves/`.
 - `features/` contains complete learner-facing capabilities and local persistence adapters.
 - `domain/tutor/` contains the core loop, prompt construction, and unit tests.
 - `domain/learner-model/` contains learner-model and analyzer contracts.

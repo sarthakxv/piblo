@@ -22,29 +22,29 @@ student message
            hint, or explanation) ──▶ next step for the learner
 ```
 
-The nine "engines" in `docs/03_SYSTEM_ARCHITECTURE.md` collapse into **two LLM calls
-per turn plus one piece of state** (the Learner Model). That is the core bet of the
-product, and it runs here today.
+The tutoring stack collapses into **two LLM calls per turn plus one piece of
+state** (the Learner Model). That is the core bet of the product, and it runs
+here today.
 
 ## Run it
 
 Needs Node ≥ 22 (native TypeScript type-stripping). Uses the **Vercel AI SDK**;
-run `npm install` once. Set `OPENCODE_API_KEY` in `prototype/.env` (a cheap
+run `npm install` once. Set `OPENCODE_API_KEY` in `.env` (a cheap
 OpenAI-compatible gateway — subscribe at https://opencode.ai/docs/go/).
 
 ```bash
-cd prototype
 npm install
-npm run dev     # open the Next.js app at http://localhost:3000
-npm run demo    # scripted student: starts wrong ("plants eat soil"), learns
-npm run chat    # talk to the tutor yourself; /state shows the learner model
+npm run dev       # open the Next.js app at http://localhost:3000
+npm run demo      # scripted student: starts wrong ("plants eat soil"), learns
+npm run chat      # talk to the tutor yourself; /state shows the learner model
 npm run typecheck
 npm test
+npm run build
 ```
 
 The learning workspace currently uses deterministic lesson moves so its complete
 interaction flow can be reviewed without consuming AI credits. Learner profiles
-and lesson sessions are saved in the current browser. The server-only
+and topic sessions are saved in the current browser. The server-only
 `/api/tutor` route exposes the live analyzer → state update → tutor pipeline for
 the next integration step. The implementation follows the
 [Piblo Interaction Design Specification](./docs/interaction-design-specification.md).
@@ -58,17 +58,17 @@ an instruction-heavy prompt); the analyzer defaults to `deepseek-v4-flash`
 
 ## Layout
 
-| File | Role |
+| Path | Role |
 |------|------|
-| `app/` | Next.js routes, layouts, loading/error states, and the tutor API |
+| `app/` | Next.js routes, layouts, loading/error states, and API handlers |
 | `components/ui/` | shadcn primitive components |
 | `components/learning-moves/` | trusted activity renderers |
-| `features/` | onboarding, library, lesson, session, and profile features |
-| `domain/tutor/` | provider-neutral tutor orchestration and prompts |
-| `domain/learner-model/` | learner-model and analyzer contracts |
+| `features/` | onboarding, library, learning, session, and profile features |
+| `domain/` | provider-neutral tutor, learner-model, assessment, and lesson logic |
 | `content/` | topic catalog and concept definitions |
 | `server/` | model-provider configuration, tutor service, environment, and logging |
 | `src/harness.ts` / `src/demo.ts` | CLI drivers retained as engine test harnesses |
+| `docs/` | design, planning, and research notes |
 
 ## What this validates
 
