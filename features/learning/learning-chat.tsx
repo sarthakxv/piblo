@@ -3,11 +3,50 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { ArrowUp, LoaderCircle, RotateCcw } from "lucide-react";
+import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { Concept } from "@/content/concepts/types.ts";
 import type { TopicSession } from "@/features/session/session-schema.ts";
+import { formatChemNotation, promoteEquationLines } from "./chem-notation.ts";
 import { DesktopMilestoneTrail, MobileMilestoneTrail } from "./milestone-trail.tsx";
+
+function ChatMessageContent({
+    content,
+    role,
+}: {
+    content: string;
+    role: "assistant" | "user";
+}) {
+    if (role === "user") {
+        return (
+            <p className="whitespace-pre-wrap text-pretty text-[0.9375rem] leading-7">{content}</p>
+        );
+    }
+
+    const markdown = formatChemNotation(promoteEquationLines(content));
+
+    return (
+        <div className="text-pretty text-[0.9375rem] leading-7 [&_p]:mt-3 [&_p:first-child]:mt-0 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5 [&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:space-y-1.5 [&_ol]:pl-5 [&_li]:leading-7 [&_strong]:font-semibold [&_em]:italic">
+            <Markdown
+                components={{
+                    pre: ({ children }) => (
+                        <pre className="mt-3 overflow-x-auto rounded-lg bg-paper-inset px-4 py-3 font-mono text-[0.875rem] leading-6 first:mt-0 [&>code]:rounded-none [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-inherit">
+                            {children}
+                        </pre>
+                    ),
+                    code: ({ children }) => (
+                        <code className="rounded-md bg-paper-inset px-1.5 py-0.5 font-mono text-[0.875em]">
+                            {children}
+                        </code>
+                    ),
+                }}
+            >
+                {markdown}
+            </Markdown>
+        </div>
+    );
+}
 
 export function LearningChat({
     concept,
@@ -62,7 +101,9 @@ export function LearningChat({
                 <header className="sticky top-0 z-20 border-b border-rule bg-paper-raised/95 backdrop-blur-sm">
                     <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
                         <div>
-                            <Link href="/library" className="font-notebook text-xl font-bold text-graphite lg:hidden">Piblo</Link>
+                            <Link href="/library" className="lg:hidden">
+                                <img src="/logo-text.svg" alt="Piblo" className="h-7 w-auto" />
+                            </Link>
                             <p className="hidden text-sm font-semibold text-graphite lg:block">Learning with Piblo</p>
                             <p className="text-xs text-graphite-muted">{concept.title} · Recommended</p>
                         </div>
@@ -87,16 +128,28 @@ export function LearningChat({
                         {session.messages.map((message, index) => (
                             <article
                                 key={`${message.role}-${index}`}
-                                className={message.role === "assistant" ? "max-w-2xl" : "ml-auto max-w-2xl"}
+                                className={message.role === "assistant" ? "relative max-w-2xl" : "ml-auto max-w-2xl"}
                             >
-                                <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wide text-graphite-muted">
-                                    {message.role === "assistant" ? "Piblo" : "You"}
-                                </p>
+                                {message.role === "assistant" ? (
+                                    <>
+                                        <img
+                                            src="/logo.svg"
+                                            alt=""
+                                            aria-hidden="true"
+                                            className="pointer-events-none absolute -left-8 top-1 size-6 sm:-left-10 sm:size-6"
+                                        />
+                                        <span className="sr-only">Piblo</span>
+                                    </>
+                                ) : (
+                                    <p className="sr-only">
+                                        You
+                                    </p>
+                                )}
                                 <div className={message.role === "assistant"
                                     ? "rounded-xl rounded-tl-sm border border-rule bg-paper-raised px-5 py-4 text-graphite"
                                     : "rounded-xl rounded-tr-sm bg-ink px-5 py-4 text-paper-raised"}
                                 >
-                                    <p className="whitespace-pre-wrap text-pretty text-[0.9375rem] leading-7">{message.content}</p>
+                                    <ChatMessageContent content={message.content} role={message.role} />
                                 </div>
                             </article>
                         ))}
@@ -104,7 +157,7 @@ export function LearningChat({
                         {busy ? (
                             <div className="flex items-center gap-3 text-sm text-graphite-soft" role="status">
                                 <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-ink" />
-                                Piblo is thinking about your answer…
+                                Piblo is thinking…
                             </div>
                         ) : null}
 
