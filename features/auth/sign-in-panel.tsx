@@ -54,13 +54,13 @@ export function SignInPanel() {
             <div className="h-1 w-16 rounded-full bg-ink" aria-hidden="true" />
             <p className="mt-7 text-xs font-bold uppercase tracking-wide text-graphite-soft">Before we begin</p>
             <h2 id="sign-in-title" className="mt-3 text-balance font-notebook text-3xl font-bold leading-tight text-graphite">Sign in to set up your learning space.</h2>
-            <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">One Google account keeps your profile and progress with you.</p>
+            {/* <p className="mt-3 text-pretty text-sm leading-6 text-graphite-soft">One Google account keeps your profile and progress with you.</p> */}
 
             <Button
                 type="button"
                 onClick={signInWithGoogle}
                 disabled={submitting}
-                className="mt-8 min-h-12 w-full gap-3 bg-graphite px-5 font-semibold text-paper-raised hover:bg-ink"
+                className="mt-16 min-h-12 w-full gap-3 bg-graphite px-5 font-semibold text-paper-raised hover:bg-ink"
             >
                 <GoogleMark />
                 {submitting ? "Opening Google…" : "Continue with Google"}

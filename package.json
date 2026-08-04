@@ -1,9 +1,13 @@
 {
   "name": "piblo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
-  "description": "Piblo adaptive learning application",
+  "description": "Piblo is an adaptive learning app built around a Socratic tutor and a learner-model analyzer.",
+  "contributors": [
+    "Sarthak Verma <sarthak.verma@gmail.com>",
+    "Vaishnavi Koshti <vaishnavi.koshti@gmail.com>"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
