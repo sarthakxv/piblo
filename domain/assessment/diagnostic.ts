@@ -1,7 +1,7 @@
 import type { Concept } from "../../content/concepts/types.ts";
 import type { LessonAnswers } from "../lesson/types.ts";
+import { pickNextFocus } from "../learner-model/focus.ts";
 import { MASTERY_THRESHOLD, emptyLearnerModel, type LearnerModel } from "../learner-model/types.ts";
-import { pickNextFocus } from "../tutor/loop.ts";
 import type { DiagnosticModelAnalysis, DiagnosticResult } from "./types.ts";
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));

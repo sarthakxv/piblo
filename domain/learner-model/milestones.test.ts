@@ -25,3 +25,21 @@ test("milestone trail distinguishes placement mastery from learned mastery", () 
     assert.equal(states[3].status, "upcoming");
     assert.equal(states[0].takeaway, PHOTOSYNTHESIS.objectives[0].takeaway);
 });
+
+test("milestone trail supports a current gap before an already-understood milestone", () => {
+    const model = emptyLearnerModel({
+        masteryByObjective: {
+            gases: 0.2,
+            "water-role": 0.9,
+        },
+        focusObjective: "gases",
+    });
+    const states = deriveMilestoneStates(
+        PHOTOSYNTHESIS,
+        model,
+        { gases: 0.2, "water-role": 0.9 },
+    );
+
+    assert.equal(states[0].status, "current");
+    assert.equal(states[1].status, "already-understood");
+});

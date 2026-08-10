@@ -114,7 +114,7 @@ test("hybrid merge accepts qualitative model confidence", () => {
     assert.ok(Math.abs(result.confidence - 0.425) < Number.EPSILON);
 });
 
-test("learner model starts at the weakest unmastered milestone", () => {
+test("learner model starts at the earliest unmastered milestone", () => {
     const diagnostic = {
         initialMasteryByObjective: {
             gases: 0.9,
@@ -130,7 +130,28 @@ test("learner model starts at the weakest unmastered milestone", () => {
     };
     const model = learnerModelFromDiagnostic(diagnostic, PHOTOSYNTHESIS);
 
-    assert.equal(model.focusObjective, "balanced-equation");
+    assert.equal(model.focusObjective, "water-role");
     assert.equal(model.masteryByObjective.gases, 0.9);
     assert.equal(model.explanationDepth, "guided");
+});
+
+test("later diagnostic mastery does not skip an earlier knowledge gap", () => {
+    const diagnostic = {
+        initialMasteryByObjective: {
+            gases: 0.2,
+            "water-role": 0.9,
+            "sunlight-job": 0.8,
+            "balanced-equation": 0.1,
+            "final-understanding": 0.1,
+        },
+        activeMisconceptions: [],
+        confidence: 0.6,
+        explanationDepth: "guided" as const,
+        knowledgeSummary: "You understand water and sunlight, but need to revisit gases.",
+    };
+
+    const model = learnerModelFromDiagnostic(diagnostic, PHOTOSYNTHESIS);
+
+    assert.equal(model.focusObjective, "gases");
+    assert.equal(model.masteryByObjective["water-role"], 0.9);
 });

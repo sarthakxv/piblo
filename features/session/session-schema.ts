@@ -1,5 +1,11 @@
 import { z } from "zod";
+import type { Concept } from "../../content/concepts/types.ts";
+import { reconcileLearnerModelFocus } from "../../domain/learner-model/focus.ts";
 import { LearnerModelSchema } from "../../domain/learner-model/schema.ts";
+import {
+    MASTERY_THRESHOLD,
+    RUNG_ANSWER,
+} from "../../domain/learner-model/types.ts";
 import { EMPTY_ANSWERS, LessonAnswersSchema } from "../../domain/lesson/types.ts";
 
 export const LEARNING_LEVEL_IDS = ["recommended", "expert"] as const;
@@ -32,6 +38,52 @@ export const TopicSessionSchema = z.object({
 });
 
 export type TopicSession = z.infer<typeof TopicSessionSchema>;
+
+export function reconcileTopicSession(
+    session: TopicSession,
+    concept: Concept,
+): TopicSession {
+    if (!session.learnerModel) return session;
+    let learnerModel = reconcileLearnerModelFocus(session.learnerModel, concept);
+    const finalObjective = concept.objectives.at(-1);
+    const priorObjectivesMastered = finalObjective
+        ? concept.objectives.slice(0, -1).every(
+            (objective) => (
+                learnerModel.masteryByObjective[objective.id] ?? 0
+            ) >= MASTERY_THRESHOLD,
+        )
+        : false;
+    const lastMessage = session.messages.at(-1);
+    const tutorClosedWithoutQuestion = lastMessage?.role === "assistant"
+        && !/[?？]/u.test(lastMessage.content);
+
+    // Older tutor prompts could sign off while the final milestone remained
+    // active. Repair only that impossible terminal state; an L3 answer still
+    // requires the learner's reflection before completion.
+    if (
+        session.stage === "chat"
+        && finalObjective
+        && learnerModel.focusObjective === finalObjective.id
+        && learnerModel.scaffoldRung < RUNG_ANSWER
+        && priorObjectivesMastered
+        && tutorClosedWithoutQuestion
+    ) {
+        learnerModel = reconcileLearnerModelFocus({
+            ...learnerModel,
+            masteryByObjective: {
+                ...learnerModel.masteryByObjective,
+                [finalObjective.id]: Math.max(
+                    learnerModel.masteryByObjective[finalObjective.id] ?? 0,
+                    MASTERY_THRESHOLD,
+                ),
+            },
+        }, concept);
+    }
+
+    return learnerModel === session.learnerModel
+        ? session
+        : { ...session, learnerModel };
+}
 
 const LegacyTopicSessionV2Schema = z.object({
     version: z.literal(2),

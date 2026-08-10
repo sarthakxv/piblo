@@ -15,6 +15,7 @@ import {
 } from "@/features/session/session-storage.ts";
 import {
     createTopicSession,
+    reconcileTopicSession,
     type TopicSession,
 } from "@/features/session/session-schema.ts";
 import { DiagnosticStage } from "./diagnostic-stage.tsx";
@@ -35,9 +36,11 @@ const withTimestamp = (session: TopicSession): TopicSession => ({
 export function TopicLearningWorkspace({
     concept,
     levelId,
+    showRecap = false,
 }: {
     concept: Concept;
     levelId: LearningLevelId;
+    showRecap?: boolean;
 }) {
     const { profile, loaded: profileLoaded } = useLearnerProfile();
     const [session, setSession] = useState<TopicSession | null>(null);
@@ -47,19 +50,27 @@ export function TopicLearningWorkspace({
 
     useEffect(() => {
         const stored = readTopicSession(concept.id, levelId);
-        setSession(stored?.stage === "analyzing"
+        const resumable: TopicSession | null = stored?.stage === "analyzing"
             ? { ...stored, stage: "diagnostic" }
-            : stored ?? createTopicSession(concept.id, levelId));
+            : stored;
+        const hydrated = resumable
+            ? reconcileTopicSession(resumable, concept)
+            : createTopicSession(concept.id, levelId);
+        setSession(showRecap && hydrated.learnerModel?.lessonComplete
+            ? { ...hydrated, stage: "complete" }
+            : hydrated);
         setSessionLoaded(true);
-    }, [concept.id, levelId]);
+    }, [concept, levelId, showRecap]);
 
     useEffect(() => {
         if (sessionLoaded && session) storeTopicSession(session);
     }, [session, sessionLoaded]);
 
     const updateSession = useCallback((update: (current: TopicSession) => TopicSession) => {
-        setSession((current) => current ? withTimestamp(update(current)) : current);
-    }, []);
+        setSession((current) => current
+            ? withTimestamp(reconcileTopicSession(update(current), concept))
+            : current);
+    }, [concept]);
 
     const updateAnswers = useCallback((update: Partial<LessonAnswers>) => {
         updateSession((current) => ({
