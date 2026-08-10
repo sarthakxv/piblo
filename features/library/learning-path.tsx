@@ -1,11 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ArrowRight, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { TopicDefinition } from "@/content/topics.ts";
+import { readTopicSession } from "@/features/session/session-storage.ts";
 
 export function LearningPath({ topic }: { topic: TopicDefinition }) {
+    const [startedLevelIds, setStartedLevelIds] = useState<ReadonlySet<string>>(new Set());
+
+    useEffect(() => {
+        setStartedLevelIds(new Set(
+            topic.levels
+                .filter((level) => readTopicSession(topic.id, level.id) !== null)
+                .map((level) => level.id),
+        ));
+    }, [topic]);
+
     return (
         <section aria-labelledby="topic-path-title" className="min-w-0 p-5 sm:p-7 lg:p-9">
             <div className="border-b border-rule pb-6">
@@ -50,7 +62,7 @@ export function LearningPath({ topic }: { topic: TopicDefinition }) {
                                         render={<Link href={`/learn/${topic.id}/${level.id}`} />}
                                         className="mt-5 bg-graphite px-5 text-paper-raised hover:bg-ink"
                                     >
-                                        Begin path
+                                        {startedLevelIds.has(level.id) ? "Continue path" : "Begin path"}
                                         <ArrowRight aria-hidden="true" className="size-4" />
                                     </Button>
                                 ) : null}
