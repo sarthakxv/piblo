@@ -6,6 +6,7 @@ import { TopicLearningWorkspace } from "@/features/learning/topic-learning-works
 
 interface LearningPageProps {
     params: Promise<{ topicId: string; levelId: string }>;
+    searchParams: Promise<{ recap?: string | string[] }>;
 }
 
 export async function generateMetadata({ params }: LearningPageProps): Promise<Metadata> {
@@ -14,8 +15,8 @@ export async function generateMetadata({ params }: LearningPageProps): Promise<M
     return { title: topic ? `${topic.name}` : "Learning path" };
 }
 
-export default async function LearningPage({ params }: LearningPageProps) {
-    const { topicId, levelId } = await params;
+export default async function LearningPage({ params, searchParams }: LearningPageProps) {
+    const [{ topicId, levelId }, query] = await Promise.all([params, searchParams]);
     const concept = findConcept(topicId);
     const level = findLevel(topicId, levelId);
     if (!concept || !level?.available) notFound();
@@ -25,6 +26,7 @@ export default async function LearningPage({ params }: LearningPageProps) {
             key={`${topicId}:${levelId}`}
             concept={concept}
             levelId={levelId as LearningLevelId}
+            showRecap={query.recap === "1"}
         />
     );
 }

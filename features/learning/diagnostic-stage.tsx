@@ -8,6 +8,8 @@ import { canSubmitMove } from "@/domain/lesson/transitions.ts";
 export function DiagnosticStage({
     topicTitle,
     learnerName,
+    email,
+    avatarUrl,
     step,
     answers,
     analyzing,
@@ -18,6 +20,8 @@ export function DiagnosticStage({
 }: {
     topicTitle: string;
     learnerName: string;
+    email?: string | null;
+    avatarUrl?: string | null;
     step: number;
     answers: LessonAnswers;
     analyzing: boolean;
@@ -32,10 +36,10 @@ export function DiagnosticStage({
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
             <div className="mx-auto max-w-6xl">
-                <AppHeader learnerName={learnerName} />
+                <AppHeader learnerName={learnerName} email={email} avatarUrl={avatarUrl} />
             </div>
 
-            <div className="mx-auto max-w-4xl px-5 py-7 sm:px-8 sm:py-12">
+            <div className="mx-auto max-w-4xl py-7 sm:py-12">
                 <div className="mb-6 flex items-center gap-4">
                     <p className="min-w-0 flex-1 truncate text-sm font-semibold text-graphite">{topicTitle}</p>
                     <p className="tabular-nums text-xs font-bold text-graphite-soft">Question {step + 1} of {DIAGNOSTIC_PHASES.length}</p>

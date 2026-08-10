@@ -1,12 +1,15 @@
 import { generateText, Output, type LanguageModel } from "ai";
 import type { ChatMessage } from "../../server/llm/types.ts";
 import type { Concept } from "../../content/concepts/types.ts";
+import { pickNextFocus } from "../learner-model/focus.ts";
 import {
   AnalyzerSchema, type AnalyzerResult, type LearnerModel,
   RUNG_ANSWER, MASTERY_THRESHOLD, CONFIDENCE_FLOOR,
   MAX_TURNS_ON_OBJECTIVE, STRUGGLE_THRESHOLD, STRUGGLE_START_RUNG,
 } from "../learner-model/types.ts";
 import { buildAnalyzerSystem, buildTutorSystem } from "./prompts.ts";
+
+export { pickNextFocus } from "../learner-model/focus.ts";
 
 const clamp = (n: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
 
@@ -59,24 +62,6 @@ export async function analyzeTurn(
     output: Output.object({ schema: AnalyzerSchema }),
   });
   return output;
-}
-
-// Choose the next objective to work: lowest mastery below threshold, preferring
-// one not already answer-revealed. Null when all are mastered.
-export function pickNextFocus(
-  mastery: Record<string, number>,
-  concept: Concept,
-  revealed: string[],
-): string | null {
-  const revealedSet = new Set(revealed);
-  const below = concept.objectives
-    .map((o) => ({ id: o.id, m: mastery[o.id] ?? 0 }))
-    .filter((o) => o.m < MASTERY_THRESHOLD);
-  if (below.length === 0) return null;
-  const fresh = below.filter((o) => !revealedSet.has(o.id));
-  const pool = fresh.length > 0 ? fresh : below;
-  pool.sort((a, b) => a.m - b.m); // V8 sort is stable -> concept order breaks ties
-  return pool[0].id;
 }
 
 // Compute the starting rung for a new objective based on session-level struggle.

@@ -62,7 +62,7 @@ test("resolved misconception removed from active set", () => {
   assert.deepEqual(after.activeMisconceptions, []);
 });
 
-test("null focus is initialized to the lowest-mastery objective", () => {
+test("null focus is initialized to the earliest unmastered objective", () => {
   const after = applyAnalysis(emptyLearnerModel(), result({ scaffoldSignal: "progressing" }), C);
   assert.equal(after.focusObjective, "gases"); // all mastery 0 -> first objective
 });
@@ -190,9 +190,11 @@ test("lessonComplete stays false while an objective remains below threshold", ()
   assert.equal(after.lessonComplete, false);
 });
 
-test("pickNextFocus: lowest mastery, skips revealed, null when all mastered", () => {
+test("pickNextFocus: earliest unmastered, skips revealed, null when all mastered", () => {
   assert.equal(pickNextFocus({}, C, []), "gases");
   assert.equal(pickNextFocus({ gases: 0.8 }, C, []), "water-role");
+  assert.equal(pickNextFocus({ gases: 0.2, "water-role": 0.9, "sunlight-job": 0 }, C, []), "gases");
+  assert.equal(pickNextFocus({ gases: 0.8, "water-role": 0.9, "sunlight-job": 0.2 }, C, []), "sunlight-job");
   assert.equal(pickNextFocus({}, C, ["gases"]), "water-role");
   const allMastered = Object.fromEntries(C.objectives.map((o) => [o.id, 0.9]));
   assert.equal(pickNextFocus(allMastered, C, []), null);

@@ -6,6 +6,7 @@ import { ArrowUp, LoaderCircle, RotateCcw } from "lucide-react";
 import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { UserMenu } from "@/components/user-menu.tsx";
 import type { Concept } from "@/content/concepts/types.ts";
 import type { TopicSession } from "@/features/session/session-schema.ts";
 import { formatChemNotation, promoteEquationLines } from "./chem-notation.ts";
@@ -53,6 +54,9 @@ export function LearningChat({
     session,
     busy,
     error,
+    learnerName,
+    email,
+    avatarUrl,
     onSend,
     onRetry,
     onViewRecap,
@@ -61,6 +65,9 @@ export function LearningChat({
     session: TopicSession & { learnerModel: NonNullable<TopicSession["learnerModel"]> };
     busy: boolean;
     error: string;
+    learnerName: string;
+    email?: string | null;
+    avatarUrl?: string | null;
     onSend: (message: string) => void;
     onRetry: () => void;
     onViewRecap: () => void;
@@ -99,7 +106,7 @@ export function LearningChat({
 
             <section className="flex min-h-dvh min-w-0 flex-col">
                 <header className="sticky top-0 z-20 border-b border-rule bg-paper-raised/95 backdrop-blur-sm">
-                    <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+                    <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
                         <div>
                             <Link href="/library" className="lg:hidden">
                                 <img src="/logo-text.svg" alt="Piblo" className="h-7 w-auto" />
@@ -107,13 +114,16 @@ export function LearningChat({
                             <p className="hidden text-sm font-semibold text-graphite lg:block">Learning with Piblo</p>
                             <p className="text-xs text-graphite-muted">{concept.title} · Recommended</p>
                         </div>
-                        <MobileMilestoneTrail
-                            concept={concept}
-                            learnerModel={session.learnerModel}
-                            initialMasteryByObjective={session.initialMasteryByObjective}
-                            recapEnabled={session.learnerModel.lessonComplete}
-                            onViewRecap={onViewRecap}
-                        />
+                        <div className="flex items-center gap-3">
+                            <MobileMilestoneTrail
+                                concept={concept}
+                                learnerModel={session.learnerModel}
+                                initialMasteryByObjective={session.initialMasteryByObjective}
+                                recapEnabled={session.learnerModel.lessonComplete}
+                                onViewRecap={onViewRecap}
+                            />
+                            <UserMenu learnerName={learnerName} email={email} avatarUrl={avatarUrl} />
+                        </div>
                     </div>
                 </header>
 

@@ -15,6 +15,8 @@ test("tutor prompt injects the ladder level and focus objective title", () => {
   assert.match(p, /FACTS vs IDEAS/);
   assert.match(p, /LANGUAGE: Respond only in English/);
   assert.match(p, /MISCONCEPTION CLOSE/);
+  assert.match(p, /learner model is the sole authority/i);
+  assert.match(p, /never announce.*complete/i);
 });
 
 test("tutor prompt with null focus gives the Predict opening, no rung", () => {
@@ -47,6 +49,8 @@ test("analyzer prompt asks for the new signals and attribution rule", () => {
   assert.match(p, /requestedAnswer/);
   assert.match(p, /working the objective "water-role"/);
   assert.match(p, /Do NOT credit/i);
+  assert.match(p, /final-understanding.*cumulative/i);
+  assert.match(p, /learner-authored evidence across the conversation/i);
 });
 
 test("analyzer prompt handles a null focus at lesson start", () => {
