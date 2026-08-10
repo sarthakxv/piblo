@@ -3,11 +3,11 @@ import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button";
 import type { Concept } from "@/content/concepts/types.ts";
 
-export function TopicOverview({ concept, learnerName, onBegin }: { concept: Concept; learnerName: string; onBegin: () => void }) {
+export function TopicOverview({ concept, learnerName, email, avatarUrl, onBegin }: { concept: Concept; learnerName: string; email?: string | null; avatarUrl?: string | null; onBegin: () => void }) {
     return (
         <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
-            <div className="mx-auto max-w-7xl">
-                <AppHeader learnerName={learnerName} />
+            <div className="mx-auto max-w-6xl">
+                <AppHeader learnerName={learnerName} email={email} avatarUrl={avatarUrl} />
 
                 <section className="flex min-h-[calc(100dvh-7rem)] flex-col justify-center py-12" aria-labelledby="topic-overview-title">
                     <div className="mx-auto max-w-3xl text-center">

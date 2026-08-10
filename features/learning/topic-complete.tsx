@@ -9,16 +9,20 @@ import { ReviewFlashcards } from "./review-flashcards.tsx";
 export function TopicComplete({
     concept,
     learnerName,
+    email,
+    avatarUrl,
     onRestart,
 }: {
     concept: Concept;
     learnerName: string;
+    email?: string | null;
+    avatarUrl?: string | null;
     onRestart: () => void;
 }) {
     return (
-        <main className="min-h-dvh px-5 py-6 sm:px-8 lg:px-12">
-            <div className="mx-auto max-w-7xl">
-                <AppHeader learnerName={learnerName} />
+        <main className="min-h-dvh">
+            <div className="mx-auto max-w-6xl px-5 pt-6 sm:px-8 lg:px-12">
+                <AppHeader learnerName={learnerName} email={email} avatarUrl={avatarUrl} />
             </div>
 
             <CompletedMilestoneRecap concept={concept} />

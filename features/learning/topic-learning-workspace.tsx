@@ -178,7 +178,7 @@ export function TopicLearningWorkspace({
     }
 
     if (session.stage === "overview") {
-        return <TopicOverview concept={concept} learnerName={profile.name} onBegin={() => updateSession((current) => ({ ...current, stage: "diagnostic" }))} />;
+        return <TopicOverview concept={concept} learnerName={profile.name} email={profile.email} avatarUrl={profile.avatarUrl} onBegin={() => updateSession((current) => ({ ...current, stage: "diagnostic" }))} />;
     }
 
     if (session.stage === "diagnostic" || session.stage === "analyzing") {
@@ -186,6 +186,8 @@ export function TopicLearningWorkspace({
             <DiagnosticStage
                 topicTitle={concept.title}
                 learnerName={profile.name}
+                email={profile.email}
+                avatarUrl={profile.avatarUrl}
                 step={session.diagnosticStep}
                 answers={session.answers}
                 analyzing={session.stage === "analyzing" || busy}
@@ -212,6 +214,9 @@ export function TopicLearningWorkspace({
                 session={{ ...session, learnerModel: session.learnerModel }}
                 busy={busy}
                 error={error}
+                learnerName={profile.name}
+                email={profile.email}
+                avatarUrl={profile.avatarUrl}
                 onSend={sendMessage}
                 onRetry={retryTurn}
                 onViewRecap={() => updateSession((current) => current.learnerModel?.lessonComplete
@@ -221,5 +226,5 @@ export function TopicLearningWorkspace({
         );
     }
 
-    return <TopicComplete concept={concept} learnerName={profile.name} onRestart={restart} />;
+    return <TopicComplete concept={concept} learnerName={profile.name} email={profile.email} avatarUrl={profile.avatarUrl} onRestart={restart} />;
 }

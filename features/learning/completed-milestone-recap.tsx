@@ -4,7 +4,7 @@ import type { Concept } from "@/content/concepts/types.ts";
 export function CompletedMilestoneRecap({ concept }: { concept: Concept }) {
     return (
         <section aria-labelledby="completed-trail-title" className="px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
-            <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-6xl">
                 <p className="text-xs font-bold uppercase tracking-wide text-moss">Understanding trail complete</p>
                 <h1 id="completed-trail-title" className="mt-3 text-balance font-notebook text-4xl font-bold leading-tight text-graphite sm:text-5xl">
                     You connected the whole idea of {concept.title.toLowerCase()}.
