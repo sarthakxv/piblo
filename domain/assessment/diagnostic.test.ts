@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { PHOTOSYNTHESIS } from "../../content/concepts/photosynthesis.ts";
 import { EMPTY_ANSWERS, type LessonAnswers } from "../lesson/types.ts";
 import {
+    analysisFromDiagnosticModelText,
     learnerModelFromDiagnostic,
     mergeDiagnosticAnalysis,
     scoreDiagnosticAnswers,
@@ -154,4 +155,35 @@ test("later diagnostic mastery does not skip an earlier knowledge gap", () => {
 
     assert.equal(model.focusObjective, "gases");
     assert.equal(model.masteryByObjective["water-role"], 0.9);
+});
+
+test("quiz analysis accepts JSON wrapped in prose", () => {
+    const analysis = analysisFromDiagnosticModelText(
+        `Here you go:\n{\n  "learnerSummary": "You already notice water and light. We will start with what the plant takes from the air.",\n  "reasoning": "Prediction named soil as food."\n}\n`,
+        PHOTOSYNTHESIS,
+    );
+
+    assert.match(analysis.learnerSummary, /water and light/);
+});
+
+test("quiz analysis truncates overlong model fields instead of rejecting the quiz", () => {
+    const analysis = analysisFromDiagnosticModelText(
+        JSON.stringify({
+            learnerSummary: `${"You already have a useful starting point. ".repeat(40)}We will begin with gases.`,
+            reasoning: "x".repeat(1200),
+            detectedMisconceptions: ["soil_food"],
+        }),
+        PHOTOSYNTHESIS,
+    );
+
+    assert.equal(analysis.learnerSummary.length, 800);
+    assert.equal(analysis.reasoning?.length, 800);
+    assert.deepEqual(analysis.detectedMisconceptions, ["soil_food"]);
+});
+
+test("quiz analysis falls back when the model returns no JSON", () => {
+    const analysis = analysisFromDiagnosticModelText("", PHOTOSYNTHESIS);
+
+    assert.match(analysis.learnerSummary, /Photosynthesis/);
+    assert.equal(analysis.detectedMisconceptions, undefined);
 });

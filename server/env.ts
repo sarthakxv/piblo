@@ -12,7 +12,7 @@ export function getServerEnvironment(): ServerEnvironment {
 
     return {
         opencodeApiKey,
-        tutorModel: process.env.OPENCODE_TUTOR_MODEL ?? "glm-5.2",
-        analyzerModel: process.env.OPENCODE_ANALYZER_MODEL ?? "deepseek-v4-flash",
+        tutorModel: process.env.OPENCODE_TUTOR_MODEL ?? "muse-spark-1.3-contributor",
+        analyzerModel: process.env.OPENCODE_ANALYZER_MODEL ?? "muse-spark-1.3-contributor",
     };
 }
