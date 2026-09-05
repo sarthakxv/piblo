@@ -1,3 +1,4 @@
+import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
 import { getServerEnvironment } from "../env.ts";
@@ -23,22 +24,46 @@ import { getServerEnvironment } from "../env.ts";
 // move to a model with native structured-output support.
 (globalThis as { AI_SDK_LOG_WARNINGS?: boolean }).AI_SDK_LOG_WARNINGS = false;
 
-function opencodeClient() {
+const GO_BASE_URL = "https://opencode.ai/zen/go/v1";
+
+// Muse Spark is served on the Responses API, not chat/completions.
+function usesResponsesApi(modelId: string): boolean {
+  return modelId.startsWith("muse-spark-");
+}
+
+function opencodeChatClient() {
   const environment = getServerEnvironment();
 
   return createOpenAICompatible({
     name: "opencode-go",
     apiKey: environment.opencodeApiKey,
-    baseURL: "https://opencode.ai/zen/go/v1",
+    baseURL: GO_BASE_URL,
   });
 }
 
+function opencodeResponsesClient() {
+  const environment = getServerEnvironment();
+
+  return createOpenAI({
+    name: "opencode-go",
+    apiKey: environment.opencodeApiKey,
+    baseURL: GO_BASE_URL,
+  });
+}
+
+function languageModel(modelId: string): LanguageModel {
+  if (usesResponsesApi(modelId)) {
+    return opencodeResponsesClient().responses(modelId);
+  }
+  return opencodeChatClient()(modelId);
+}
+
 export function getTutorModel(): LanguageModel {
-  return opencodeClient()(getServerEnvironment().tutorModel);
+  return languageModel(getServerEnvironment().tutorModel);
 }
 
 export function getAnalyzerModel(): LanguageModel {
-  return opencodeClient()(getServerEnvironment().analyzerModel);
+  return languageModel(getServerEnvironment().analyzerModel);
 }
 
 // Human-readable label for logs / the UI panel.

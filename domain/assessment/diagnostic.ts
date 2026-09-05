@@ -2,9 +2,41 @@ import type { Concept } from "../../content/concepts/types.ts";
 import type { LessonAnswers } from "../lesson/types.ts";
 import { pickNextFocus } from "../learner-model/focus.ts";
 import { MASTERY_THRESHOLD, emptyLearnerModel, type LearnerModel } from "../learner-model/types.ts";
-import type { DiagnosticModelAnalysis, DiagnosticResult } from "./types.ts";
+import { DiagnosticModelAnalysisSchema, type DiagnosticModelAnalysis, type DiagnosticResult } from "./types.ts";
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
+const DIAGNOSTIC_TEXT_MAX = 800;
+
+export function fallbackLearnerSummary(concept: Concept): string {
+    return `Thanks for those answers. You already have a useful starting point on ${concept.title}, and we'll begin with the first idea that still needs work.`;
+}
+
+export function analysisFromDiagnosticModelText(
+    text: string,
+    concept: Concept,
+): DiagnosticModelAnalysis {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start < 0 || end <= start) {
+        return { learnerSummary: fallbackLearnerSummary(concept) };
+    }
+
+    try {
+        const raw = JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
+        if (typeof raw.learnerSummary === "string") {
+            raw.learnerSummary = raw.learnerSummary.trim().slice(0, DIAGNOSTIC_TEXT_MAX);
+        }
+        if (typeof raw.reasoning === "string") {
+            raw.reasoning = raw.reasoning.trim().slice(0, DIAGNOSTIC_TEXT_MAX);
+        }
+        const parsed = DiagnosticModelAnalysisSchema.safeParse(raw);
+        return parsed.success
+            ? parsed.data
+            : { learnerSummary: fallbackLearnerSummary(concept) };
+    } catch {
+        return { learnerSummary: fallbackLearnerSummary(concept) };
+    }
+}
 
 const includesAny = (value: string, terms: string[]) => {
     const normalized = value.toLowerCase();

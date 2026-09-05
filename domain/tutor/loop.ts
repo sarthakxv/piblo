@@ -1,4 +1,4 @@
-import { generateText, Output, type LanguageModel } from "ai";
+import { generateText, type LanguageModel } from "ai";
 import type { ChatMessage } from "../../server/llm/types.ts";
 import type { Concept } from "../../content/concepts/types.ts";
 import { pickNextFocus } from "../learner-model/focus.ts";
@@ -12,6 +12,15 @@ import { buildAnalyzerSystem, buildTutorSystem } from "./prompts.ts";
 export { pickNextFocus } from "../learner-model/focus.ts";
 
 const clamp = (n: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
+
+function parseJsonObject(text: string): unknown {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) {
+    throw new Error("Model produced no JSON object.");
+  }
+  return JSON.parse(text.slice(start, end + 1));
+}
 
 // Generate the tutor's next Socratic move, adapted to the current learner model.
 export async function tutorTurn(
@@ -46,22 +55,22 @@ export async function tutorTurn(
 }
 
 // Analyze the student's latest message into a structured mastery/misconception
-// update. `Output.object` validates the model's output against AnalyzerSchema
-// (retrying on mismatch), so we get a typed object with no manual JSON parsing.
+// update. Muse Spark's Responses API rejects JSON Schema `propertyNames`
+// (used by `z.record`), so we ask for JSON in the prompt and validate it here.
 export async function analyzeTurn(
   llm: LanguageModel,
   concept: Concept,
   history: ChatMessage[],
   focusObjective: string | null,
 ): Promise<AnalyzerResult> {
-  const { output } = await generateText({
+  const { text } = await generateText({
     model: llm,
     instructions: buildAnalyzerSystem(concept, focusObjective),
     messages: history,
     temperature: 0,
-    output: Output.object({ schema: AnalyzerSchema }),
+    maxOutputTokens: 4096,
   });
-  return output;
+  return AnalyzerSchema.parse(parseJsonObject(text));
 }
 
 // Compute the starting rung for a new objective based on session-level struggle.
