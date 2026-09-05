@@ -22,7 +22,7 @@ export async function tutorTurn(
 ): Promise<string> {
   const { text, finishReason } = await generateText({
     model: llm,
-    system: buildTutorSystem(concept, model),
+    instructions: buildTutorSystem(concept, model),
     messages: history,
     temperature: 0.7,
     // GLM is a reasoning model: chain-of-thought counts against this
@@ -56,7 +56,7 @@ export async function analyzeTurn(
 ): Promise<AnalyzerResult> {
   const { output } = await generateText({
     model: llm,
-    system: buildAnalyzerSystem(concept, focusObjective),
+    instructions: buildAnalyzerSystem(concept, focusObjective),
     messages: history,
     temperature: 0,
     output: Output.object({ schema: AnalyzerSchema }),

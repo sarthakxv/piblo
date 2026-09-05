@@ -28,7 +28,7 @@ export async function startLearning(request: StartLearningRequest) {
     const deterministic = scoreDiagnosticAnswers(request.answers);
     const { output: modelAnalysis } = await generateText({
         model: getAnalyzerModel(),
-        system: buildDiagnosticSystem(concept, request.answers),
+        instructions: buildDiagnosticSystem(concept, request.answers),
         prompt: "Analyze these diagnostic answers and return the placement result.",
         temperature: 0,
         output: Output.object({ schema: DiagnosticModelAnalysisSchema }),
